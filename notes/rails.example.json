@@ -1,0 +1,12 @@
+{
+  "enabled": true,
+  "left": {"items": [
+    {"type": "youtube", "id": "J9dvPQuHz-I", "title": "Нарезка мыла", "aspect": "16:9"},
+    {"type": "video", "src": "candy.mp4", "title": "Конфеты"},
+    {"type": "ad", "label": "Реклама", "title": "Название сбора или спонсора",
+     "text": "Короткий текст под заголовком", "image": "banner.png", "link": "https://example.org/"}
+  ]},
+  "right": {"items": [
+    {"type": "youtube", "id": "plUsPpUjOv0", "title": "Subway Surfers", "aspect": "9:16"}
+  ]}
+}

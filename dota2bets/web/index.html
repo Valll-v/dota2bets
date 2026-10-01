@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dota2bets — прогнозы</title>
+<link rel="stylesheet" href="/static/fonts/fonts.css">
+<style>
+  :root {
+    --bg:#0B0C0E; --card:#131519; --inset:#0F1114; --tile:#1A1D22; --line:#22262D; --line2:#2B3038; --hair:#1E2127; --hair2:#1C1F25;
+    --text:#ECEEF1; --t2:#B9BFC8; --t3:#9AA1AC; --muted:#858C98; --dim:#6B717C; --faint:#3A3F48;
+    --lime:#C6F24E; --a:#4D8DFF; --at:#6EA2FF; --b:#FF8A3D; --bt:#FF9A55; --red:#FF4D5E; --redt:#FF7A86; --amber:#F5B83D;
+    --pad:clamp(16px, 5.5vw, 80px);
+  }
+  * { box-sizing:border-box; }
+  html { scrollbar-color:#2B3038 #0B0C0E; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:'Manrope',system-ui,sans-serif; font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased; min-height:100vh; display:flex; flex-direction:column; }
+  a { color:var(--lime); text-decoration:none; } a:hover { color:#DDFF85; }
+  h1, h2, h3, p { margin:0; }
+  button, input, select, textarea { font-family:inherit; }
+  code { font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--tile); padding:1px 6px; border-radius:5px; color:var(--t2); }
+  .disp { font-family:'Unbounded','Manrope',sans-serif; letter-spacing:-0.01em; }
+  .mono { font-family:'JetBrains Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; }
+  .pad { padding:28px; } .pad-s { padding:24px; }
+  .col { display:flex; flex-direction:column; }
+  .lbl { font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  .chip { display:inline-flex; align-items:center; gap:6px; height:26px; padding:0 10px; border-radius:999px; background:var(--tile); border:1px solid #272B32; font-size:12px; color:var(--t2); font-weight:600; white-space:nowrap; }
+  button.chip, a.chip { cursor:pointer; } a.chip:hover, button.chip:hover { color:var(--text); border-color:var(--faint); }
+  .chip.lime { background:rgba(198,242,78,.1); border-color:rgba(198,242,78,.35); color:var(--lime); }
+  .chip.live { color:var(--redt); border-color:rgba(255,77,94,.4); background:rgba(255,77,94,.08); }
+  .chip select { background:transparent; border:0; color:inherit; font:inherit; outline:0; cursor:pointer; padding:0; height:24px; }
+  .chip select option { background:var(--tile); color:var(--text); }
+  .dot { width:7px; height:7px; border-radius:50%; display:inline-block; flex-shrink:0; }
+  .logo { flex-shrink:0; border-radius:10px; background:#1C2026; border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; font-family:'Unbounded',sans-serif; font-weight:700; color:var(--text); overflow:hidden; text-transform:uppercase; }
+  .logo img { width:72%; height:72%; object-fit:contain; }
+  .bar { display:flex; height:6px; border-radius:4px; overflow:hidden; background:var(--b); }
+  .bar > span { display:block; height:100%; background:var(--a); border-right:2px solid var(--card); }
+  .bar > i { display:block; height:100%; background:var(--dim); border-right:2px solid var(--card); }
+  .btn { height:44px; padding:0 20px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:700; font-size:14px; border:0; cursor:pointer; white-space:nowrap; }
+  .btn.pri { background:var(--lime); color:var(--bg); } .btn.pri:hover { background:#D6FF6A; color:var(--bg); }
+  .btn.sec { background:var(--tile); color:var(--text); border:1px solid var(--line2); } .btn.sec:hover { border-color:var(--faint); color:var(--text); }
+  .btn.sm { height:36px; padding:0 14px; font-size:13px; border-radius:9px; }
+  .btn.ico { width:44px; padding:0; }
+  .btn:disabled { opacity:.45; cursor:default; }
+  .form { display:inline-flex; width:18px; height:18px; border-radius:4px; align-items:center; justify-content:center; font-size:10px; font-weight:800; font-family:'JetBrains Mono',monospace; flex-shrink:0; }
+  .form.lg { width:22px; height:22px; border-radius:5px; font-size:11px; }
+  .form.w { background:var(--lime); color:var(--bg); } .form.l { color:var(--muted); border:1px solid var(--faint); }
+  .seg { height:36px; padding:0 16px; border-radius:8px; background:transparent; border:0; color:var(--t3); font-weight:600; font-size:14px; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; white-space:nowrap; }
+  .seg.on { background:#262A31; color:var(--text); }
+  .segs { display:flex; padding:4px; gap:4px; background:var(--card); border:1px solid var(--line); border-radius:12px; }
+  .fchip { height:36px; padding:0 14px; border-radius:999px; background:transparent; border:1px solid var(--line2); color:var(--t2); font-weight:600; font-size:13px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; white-space:nowrap; }
+  .fchip.on { background:var(--text); color:var(--bg); border-color:var(--text); }
+  select.fchip { appearance:none; padding-right:32px; background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23B9BFC8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center; max-width:280px; }
+  select.fchip option { background:var(--tile); color:var(--text); }
+  .tile { padding:16px 18px; border-radius:12px; background:var(--tile); display:flex; flex-direction:column; gap:8px; min-width:0; }
+  .tile .v { font-size:22px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tile .v small { font-size:14px; color:var(--muted); font-weight:500; }
+  .tile .s { font-size:12px; color:var(--muted); }
+  .tiles { display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); }
+  .muted { color:var(--muted); } .t2 { color:var(--t2); } .t3 { color:var(--t3); } .small { font-size:12px; }
+  .pos { color:var(--lime); } .neg { color:var(--redt); }
+  .ca { color:var(--at); } .cb { color:var(--bt); }
+  .h2 { font-family:'Unbounded','Manrope',sans-serif; letter-spacing:-0.01em; font-size:18px; font-weight:600; }
+  .h3 { font-family:'Unbounded','Manrope',sans-serif; letter-spacing:-0.01em; font-size:16px; font-weight:600; }
+  .plain { color:var(--text); } .plain:hover { color:var(--text); }
+  .sp { flex:1; }
+
+  /* шапка */
+  header.top { height:68px; flex-shrink:0; padding:0 var(--pad); display:flex; align-items:center; gap:40px; border-bottom:1px solid var(--hair2); position:sticky; top:0; z-index:20; background:rgba(11,12,14,.92); backdrop-filter:blur(10px); }
+  .brand { display:flex; align-items:center; gap:10px; }
+  .nav { height:36px; padding:0 14px; border-radius:8px; display:flex; align-items:center; gap:8px; color:var(--t3); font-size:14px; font-weight:600; white-space:nowrap; }
+  .nav:hover { color:var(--text); } .nav.on { background:var(--tile); color:var(--text); }
+  main { flex-grow:1; width:100%; max-width:1440px; margin:0 auto; padding:40px var(--pad) 56px; display:flex; flex-direction:column; gap:28px; }
+  footer.foot { flex-shrink:0; padding:24px var(--pad); border-top:1px solid var(--hair2); display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:13px; color:var(--muted); }
+  .tabbar { display:none; }
+  .pop { position:absolute; right:var(--pad); top:60px; width:340px; padding:20px; z-index:30; box-shadow:0 24px 60px rgba(0,0,0,.6); display:flex; flex-direction:column; gap:12px; }
+  .kv { display:flex; justify-content:space-between; gap:12px; font-size:13px; color:var(--t3); } .kv b { color:var(--text); font-family:'JetBrains Mono',monospace; font-weight:600; }
+
+  /* лента */
+  .two { display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:24px; align-items:start; }
+  .two.wide { grid-template-columns:minmax(0,1fr) 400px; }
+  .g2 { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:20px; }
+  .g3 { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:20px; }
+  .vs { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:24px; }
+  .vs .t { display:flex; align-items:center; gap:16px; min-width:0; }
+  .vs .t.r { flex-direction:row-reverse; text-align:right; }
+  .vs .t.r .meta { align-items:flex-end; }
+  .vs .meta { display:flex; flex-direction:column; gap:8px; min-width:0; }
+  .vs .name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; }
+  .fl { display:flex; align-items:center; gap:4px; font-size:13px; color:var(--muted); flex-wrap:wrap; }
+  .big { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+  .big .n { font-size:52px; font-weight:700; line-height:1; }
+  .why { padding:20px; border-radius:12px; background:var(--inset); border:1px solid var(--line); display:flex; flex-direction:column; gap:14px; }
+  .bul { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px; }
+  .bul li { display:flex; gap:12px; font-size:14px; line-height:1.5; color:var(--t2); } .bul li .dot { margin-top:7px; }
+  .bul b { color:var(--text); }
+  .row { display:flex; align-items:center; gap:14px; padding:14px 24px; border-top:1px solid var(--hair); color:var(--text); }
+  .row:hover { background:#171A1E; color:var(--text); }
+  .row .tm { width:52px; display:flex; flex-direction:column; gap:2px; flex-shrink:0; }
+  .row .ta, .row .tb { flex:1; min-width:0; display:flex; align-items:center; gap:12px; font-size:14px; font-weight:700; }
+  .row .ta { justify-content:flex-end; } .row .ta span:first-child, .row .tb span:last-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .row .pp { width:150px; display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
+  .row .sc { width:78px; font-size:13px; color:var(--muted); flex-shrink:0; white-space:nowrap; }
+  .row .cf { width:96px; display:flex; align-items:center; gap:6px; font-size:13px; color:var(--t2); flex-shrink:0; }
+  .sect { padding:12px 24px 10px; border-top:1px solid var(--hair); }
+  .ok { display:inline-flex; align-items:center; gap:6px; height:26px; padding:0 10px; border-radius:999px; background:var(--lime); color:var(--bg); font-size:12px; font-weight:800; white-space:nowrap; }
+  .miss { display:inline-flex; align-items:center; gap:6px; height:26px; padding:0 10px; border-radius:999px; border:1px solid var(--faint); color:var(--t3); font-size:12px; font-weight:700; white-space:nowrap; }
+  .cmp { display:grid; grid-template-columns:120px minmax(0,1fr) 48px; align-items:center; gap:12px; font-size:13px; }
+  .track { height:8px; border-radius:4px; background:#1E2228; display:block; } .fill { display:block; height:100%; border-radius:4px; }
+  .empty { padding:40px 24px; text-align:center; color:var(--muted); border:1px dashed var(--faint); border-radius:16px; }
+  .skel { height:180px; border-radius:16px; background:linear-gradient(90deg, #131519 0%, #1A1D22 50%, #131519 100%); background-size:200% 100%; animation:sk 1.4s linear infinite; }
+  @keyframes sk { to { background-position:-200% 0; } }
+  .rec { display:flex; gap:12px; padding:14px 16px; border-radius:12px; background:var(--inset); border:1px solid var(--line); font-size:14px; line-height:1.5; color:var(--t2); }
+  .rec svg { width:20px; height:20px; flex:none; margin-top:1px; }
+  .rec .k { display:block; font-size:11px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; margin-bottom:2px; }
+  .rec.bet { border-color:rgba(198,242,78,.4); background:rgba(198,242,78,.06); } .rec.bet svg, .rec.bet .k { color:var(--lime); }
+  .rec.cond svg, .rec.cond .k { color:var(--amber); } .rec.skip svg, .rec.skip .k { color:var(--muted); }
+  .warn { display:flex; gap:10px; font-size:13px; color:var(--amber); line-height:1.5; } .warn svg { width:16px; height:16px; flex:none; margin-top:2px; }
+
+  /* разбор матча */
+  .tabs { display:flex; border-bottom:1px solid var(--line); overflow-x:auto; scrollbar-width:none; }
+  .tab { height:48px; padding:0 4px; margin-right:24px; background:transparent; border:0; border-bottom:2px solid transparent; color:var(--t3); font-weight:700; font-size:15px; cursor:pointer; display:flex; align-items:center; gap:8px; white-space:nowrap; }
+  .tab:hover { color:var(--text); } .tab.on { color:var(--text); border-bottom-color:var(--lime); }
+  .fac { display:grid; grid-template-columns:220px minmax(0,1fr) minmax(0,1fr) 64px; align-items:center; }
+  .fac.s { grid-template-columns:140px minmax(0,1fr) minmax(0,1fr) 52px; }
+  .fac .nm { font-size:14px; color:var(--t2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .fac.s .nm { font-size:13px; }
+  .fac .lh { height:28px; display:flex; align-items:center; justify-content:flex-end; border-right:1px solid var(--faint); padding-right:2px; }
+  .fac .rh { height:28px; display:flex; align-items:center; padding-left:2px; }
+  .fac .lh i { height:12px; border-radius:3px 0 0 3px; background:var(--a); display:block; } .fac .rh i { height:12px; border-radius:0 3px 3px 0; background:var(--b); display:block; }
+  .fac .val { text-align:right; font-size:13px; font-weight:700; }
+  .scores { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:16px; align-items:end; height:200px; }
+  .scores > div { display:flex; flex-direction:column; align-items:center; gap:10px; height:100%; justify-content:flex-end; }
+  .scores i { width:100%; border-radius:8px 8px 2px 2px; display:block; min-height:3px; }
+  .scl { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:16px; }
+  .scl > div { display:flex; flex-direction:column; align-items:center; gap:2px; text-align:center; }
+  .pcard { padding:18px; border-radius:12px; background:var(--tile); display:flex; flex-direction:column; gap:10px; min-width:0; }
+  .mrow { display:grid; grid-template-columns:minmax(0,1fr) 64px 52px; gap:12px; align-items:center; padding:11px 0; border-top:1px solid var(--hair); font-size:14px; }
+  .chk { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px; font-size:14px; color:var(--t2); }
+  .chk li { display:flex; gap:10px; align-items:flex-start; } .chk svg { flex-shrink:0; margin-top:1px; }
+  .md { font-size:15px; line-height:1.65; color:var(--t2); display:flex; flex-direction:column; gap:12px; }
+  .md h4 { margin:8px 0 0; font-size:15px; color:var(--text); font-weight:800; } .md b { color:var(--text); } .md ul, .md ol { margin:0; padding-left:22px; display:flex; flex-direction:column; gap:6px; }
+  .md table { font-size:13px; }
+  .clip { max-height:300px; overflow:hidden; position:relative; } .clip::after { content:''; position:absolute; left:0; right:0; bottom:0; height:80px; background:linear-gradient(transparent, var(--card)); }
+  pre.stream { margin:0; max-height:340px; overflow:auto; white-space:pre-wrap; font-family:'Manrope',sans-serif; font-size:14px; line-height:1.6; color:var(--t2); padding:16px; background:var(--inset); border:1px solid var(--line); border-radius:12px; }
+  .log { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim); white-space:pre-wrap; max-height:110px; overflow:auto; }
+
+  /* формы и таблицы */
+  input[type=text], input[type=number], select.in, textarea { height:40px; padding:0 12px; border-radius:10px; background:var(--inset); border:1px solid var(--line2); color:var(--text); font-size:14px; outline:0; width:100%; }
+  textarea { height:auto; padding:12px; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.5; resize:vertical; }
+  input:focus, select.in:focus, textarea:focus { border-color:var(--lime); }
+  input[type=checkbox] { width:18px; height:18px; accent-color:var(--lime); margin:0; }
+  select.in option { background:var(--tile); }
+  label.f { display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--muted); font-weight:600; min-width:0; }
+  label.ck { display:flex; align-items:center; gap:10px; font-size:14px; color:var(--t2); cursor:pointer; }
+  .frow { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th { text-align:left; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700; padding:10px 12px; white-space:nowrap; }
+  td { padding:12px; border-top:1px solid var(--hair); vertical-align:middle; }
+  th.num, td.num { text-align:right; font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; }
+  .scroll { overflow-x:auto; }
+  .hp { width:56px; height:32px; border-radius:6px; background:#1E2228; border:1px solid var(--line2); flex-shrink:0; overflow:hidden; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:var(--muted); }
+  .hp img { width:100%; height:100%; object-fit:cover; } .hp.s { width:42px; height:24px; border-radius:5px; }
+  .hero { display:flex; align-items:center; gap:12px; padding:8px 0; min-width:0; }
+  .dpick { display:flex; gap:12px; padding:12px 0; border-top:1px solid var(--hair); }
+  .tag { display:inline-flex; align-items:center; gap:5px; height:22px; padding:0 8px; border-radius:999px; border:1px solid #272B32; background:var(--tile); font-size:11px; font-weight:700; color:var(--t2); white-space:nowrap; }
+  .tag.ok { color:var(--lime); } .tag.bad { color:var(--redt); } .tag.warn { color:var(--amber); }
+  .dd { position:absolute; left:0; right:0; top:46px; z-index:40; background:var(--tile); border:1px solid var(--line2); border-radius:12px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.6); max-height:330px; overflow-y:auto; }
+  .dd > div { display:flex; gap:12px; align-items:center; padding:10px 14px; cursor:pointer; } .dd > div:hover { background:#22262D; }
+  details > summary { cursor:pointer; font-size:14px; font-weight:700; color:var(--t2); } details > summary:hover { color:var(--text); }
+  .side { display:flex; flex-direction:column; gap:10px; padding:16px; border-radius:12px; border:1px solid var(--line); background:var(--card); color:var(--text); cursor:pointer; }
+  .side:hover { border-color:var(--faint); color:var(--text); } .side.on { border-color:rgba(255,77,94,.5); background:#16181C; }
+  .jr { display:flex; justify-content:space-between; gap:10px; font-size:14px; font-weight:700; } .jr span:first-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  svg text { font-family:'JetBrains Mono',monospace; font-size:11px; fill:var(--dim); }
+  svg .xh { stroke:var(--faint); stroke-width:1; opacity:0; pointer-events:none; } svg .xd { opacity:0; pointer-events:none; }
+  #tip { position:fixed; z-index:100; pointer-events:none; opacity:0; transition:opacity .1s; max-width:320px; padding:10px 12px; border-radius:10px; background:#22262D; border:1px solid var(--faint); font-size:12px; line-height:1.45; color:var(--text); box-shadow:0 12px 30px rgba(0,0,0,.5); }
+  #tip small { display:block; color:var(--t3); margin-top:3px; font-size:11px; }
+  #toasts { position:fixed; right:20px; bottom:20px; z-index:110; display:flex; flex-direction:column; gap:8px; max-width:420px; }
+  .toast { padding:12px 16px; border-radius:12px; background:#22262D; border:1px solid var(--faint); font-size:13px; white-space:pre-line; box-shadow:0 12px 30px rgba(0,0,0,.5); }
+  .toast.ok { border-color:rgba(198,242,78,.5); } .toast.err { border-color:rgba(255,77,94,.6); }
+  #search { position:fixed; inset:0; z-index:60; background:rgba(5,6,8,.72); backdrop-filter:blur(6px); display:flex; justify-content:center; align-items:flex-start; padding:12vh 16px 0; }
+  #search .box { width:100%; max-width:640px; padding:24px; display:flex; flex-direction:column; gap:16px; }
+  /* боковые панели разбора */
+  .rail { position:fixed; top:92px; bottom:24px; width:var(--rw); display:none; flex-direction:column; gap:10px; z-index:5; --rw:min(340px, calc((100vw - 1180px) / 2 - 40px)); }
+  .rail.l { left:24px; } .rail.r { right:24px; }
+  .rail .frame { position:relative; flex:1; min-height:0; border-radius:16px; overflow:hidden; background:#000; border:1px solid var(--line); }
+  .rail iframe, .rail video { position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:cover; }
+  .rail .cover { left:50%; right:auto; width:auto; aspect-ratio:16/9; transform:translateX(-50%); }
+  .rail .ad { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-end; gap:8px; padding:18px; background:var(--card) center/cover no-repeat; color:var(--text); }
+  .rail .ad::before { content:''; position:absolute; inset:0; background:linear-gradient(transparent 35%, rgba(11,12,14,.92)); }
+  .rail .ad > * { position:relative; }
+  .rail .bar2 { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .rail .bar2 .chip { height:24px; font-size:11px; padding:0 9px; } .rail .bar2 .chip.on { background:var(--text); color:var(--bg); border-color:var(--text); }
+  @media (min-width:1600px) { body.rails main { max-width:1180px; --pad:32px; } body.rails .rail { display:flex; } }
+  @media (max-width:1599px) { #railBtn { display:none; } }
+  [hidden] { display:none !important; }
+
+  @media (max-width:1180px) {
+    .two, .two.wide { grid-template-columns:minmax(0,1fr); }
+    header.top { gap:20px; } header.top .hide-m { display:none; }
+    .livegrid { grid-template-columns:minmax(0,1fr) !important; }
+  }
+  @media (max-width:860px) {
+    main { padding:16px 16px 100px; gap:16px; }
+    header.top { height:60px; padding:0 16px; } header.top nav { display:none !important; }
+    footer.foot { padding:16px 16px 96px; }
+    .tabbar { display:flex; position:fixed; left:0; right:0; bottom:0; height:72px; padding:0 8px 10px; background:var(--inset); border-top:1px solid var(--hair); z-index:25; }
+    .tb { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-size:11px; font-weight:700; color:var(--muted); }
+    .tb.on { color:var(--lime); } .tb:hover { color:var(--text); } .tb.on:hover { color:var(--lime); }
+    .g2, .g3 { grid-template-columns:minmax(0,1fr); }
+    .pad { padding:18px; } .pad-s { padding:16px; }
+    h1.disp { font-size:26px !important; }
+    .headrow { flex-direction:column; align-items:stretch !important; } .segs .seg { flex:1; padding:0 8px; }
+    .filters { overflow-x:auto; scrollbar-width:none; } .filters label { margin-left:0 !important; white-space:nowrap; }
+    .vs { grid-template-columns:minmax(0,1fr); gap:12px; } .vs .mid { display:none; }
+    .vs .t.r { flex-direction:row; text-align:left; } .vs .t.r .meta { align-items:flex-start; } .vs .t.r .fl { flex-direction:row-reverse; justify-content:flex-end; }
+    .vs .logo { width:40px !important; height:40px !important; border-radius:10px !important; font-size:10px !important; }
+    .vs .name { font-size:17px !important; }
+    .big .n { font-size:30px !important; } .big .mid small { display:none; }
+    .t3cols { grid-template-columns:repeat(2, minmax(0,1fr)) !important; gap:8px !important; } .t3cols .tile { padding:12px; } .t3cols .tile .v { font-size:17px !important; } .t3cols .lbl { font-size:10px; }
+    #mHead, #liveMain > section:first-child { padding:18px !important; gap:20px !important; } .big .lbl { font-size:9px; }
+    .row { flex-wrap:wrap; gap:8px 10px; padding:14px 16px; } .row .logo, .row > svg { display:none; }
+    .row .tm { width:auto; flex-direction:row; gap:8px; align-items:baseline; order:1; } .row .cf { order:2; margin-left:auto; width:auto; } .row .sc { order:3; width:auto; }
+    .row .ta { order:4; flex:0 0 calc(50% - 5px); justify-content:flex-start; } .row .tb { order:5; flex:0 0 calc(50% - 5px); justify-content:flex-end; }
+    .row .pp { order:6; width:100%; } .sect { padding:12px 16px 10px; }
+    .fac, .fac.s { grid-template-columns:110px minmax(0,1fr) minmax(0,1fr) 48px; } .fac .nm { font-size:12px; }
+    .hrow { grid-template-columns:52px minmax(0,1fr) 84px !important; padding:12px 16px !important; } .hrow .hp2, .hrow .hs { display:none; }
+    .pop { right:16px; left:16px; width:auto; }
+    #toasts { left:16px; right:16px; bottom:88px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="brand plain" href="#feed">
+    <span class="logo" style="width:34px;height:34px;border-radius:9px;background:var(--lime);border:0;color:var(--bg);font-size:12px">D2</span>
+    <span class="disp" style="font-size:17px;font-weight:700">dota2bets</span>
+  </a>
+  <nav style="display:flex;gap:4px" aria-label="Разделы">
+    <a class="nav" data-nav="feed" href="#feed">Прогнозы</a>
+    <a class="nav" data-nav="live" href="#live"><span class="dot" style="background:var(--red)"></span>Live<span class="mono" style="font-size:12px;color:var(--muted)" id="liveCount"></span></a>
+    <a class="nav" data-nav="tournaments" href="#tournaments">Турниры</a>
+    <a class="nav" data-nav="accuracy" href="#accuracy">Точность модели</a>
+  </nav>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+    <button class="chip hide-m" id="modelChip" aria-haspopup="true"><span class="dot" style="background:var(--dim)"></span>загрузка…</button>
+    <a class="chip hide-m" id="accChip" href="#accuracy" hidden></a>
+    <a class="btn sec ico" href="#journal" data-nav="journal" aria-label="Журнал ставок" data-tip="Журнал и политика ставок"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h12a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></a>
+    <button class="btn sec ico" id="searchBtn" aria-label="Найти команду"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+  </div>
+  <div class="card pop" id="statusPop" hidden></div>
+</header>
+
+<main id="view"><div class="skel"></div><div class="skel"></div></main>
+
+<footer class="foot">
+  <span>Прогнозы носят информационный характер и не являются рекомендацией. 18+</span>
+  <span id="footData">Данные: OpenDota</span>
+</footer>
+
+<nav class="tabbar" aria-label="Разделы">
+  <a class="tb" data-nav="feed" href="#feed"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>Прогнозы</a>
+  <a class="tb" data-nav="live" href="#live"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M7.8 16.2a6 6 0 0 1 0-8.4M19 5a10 10 0 0 1 0 14M5 19A10 10 0 0 1 5 5"/></svg>Live</a>
+  <a class="tb" data-nav="tournaments" href="#tournaments"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h5v6H4M4 13h5v6H4M9 8h4v8H9M13 12h7"/></svg>Турниры</a>
+  <a class="tb" data-nav="accuracy" href="#accuracy"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>Точность</a>
+</nav>
+
+<div id="search" hidden><div class="card box">
+  <div style="display:flex;align-items:center;justify-content:space-between"><span class="h2">Разобрать матч</span><button class="btn sec sm" id="searchClose">Закрыть</button></div>
+  <p class="t3">Выберите две команды — откроется разбор с прогнозом, составами и рынками.</p>
+  <div class="g2" style="gap:12px">
+    <div style="position:relative"><input type="text" class="teamq" data-side="a" placeholder="Команда A" autocomplete="off"><div class="dd" hidden></div></div>
+    <div style="position:relative"><input type="text" class="teamq" data-side="b" placeholder="Команда B" autocomplete="off"><div class="dd" hidden></div></div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center"><button class="btn pri" id="searchGo" disabled>Открыть разбор</button><span class="muted small" id="searchHint"></span></div>
+</div></div>
+<aside class="rail l" id="railL" aria-label="Фоновое видео"></aside>
+<aside class="rail r" id="railR" aria-label="Фоновое видео"></aside>
+<datalist id="heroList"></datalist>
+<div id="tip"></div>
+<div id="toasts"></div>
+
+<script>
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const api = async (path, body) => {
+  const r = await fetch(path, body ? {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)} : {});
+  const j = await r.json();
+  if (!r.ok || j.error) throw new Error(j.error || r.statusText);
+  return j;
+};
+const pct = (x, d=1) => (100*x).toFixed(d) + '%';
+const p0 = x => Math.round(100*x) + '%';
+const num = x => Number(x).toLocaleString('ru-RU');
+const rub = x => Math.round(x).toLocaleString('ru-RU') + ' ₽';
+const fair = p => p > 0.005 ? (1 / p).toFixed(2) : '—';
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad2 = n => String(n).padStart(2, '0');
+const dt = ts => new Date(ts * 1000);
+const hm = ts => pad2(dt(ts).getHours()) + ':' + pad2(dt(ts).getMinutes());
+const dm = ts => pad2(dt(ts).getDate()) + '.' + pad2(dt(ts).getMonth() + 1);
+const dmy = ts => ts ? dm(ts) + '.' + dt(ts).getFullYear() : '—';
+const TZ = new Date().getTimezoneOffset() === -180 ? ' МСК' : '';
+const HERO_CDN = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/';
+const I = {
+  arrow: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  back: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
+  chev: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B616C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>',
+  yes: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C6F24E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
+  no: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F5B83D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  ok12: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
+  x12: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  clock: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C6F24E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  bet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>',
+  cond: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>',
+  skip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>',
+  warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17.5v.5"/></svg>',
+};
+const FEATURE = {elo:'Рейтинг команды', roster_elo:'Рейтинг пятёрки', form:'Форма', h2h:'Личные встречи', stability:'Сыгранность', lineup_change:'Смена состава',
+  rest:'Отдых', load7:'Нагрузка за неделю', today:'Карт сегодня', series_lead:'Счёт в серии', throw:'Сливы лида', comeback:'Камбэки', decider:'Решающие карты',
+  tier_res:'Игра на LAN', farm:'Фарм игроков', lane:'Лейнинг', meta:'Мета героев', synergy:'Синергии', counter:'Контры', team_hero:'Комфорт команды на героях',
+  player_hero:'Комфорт игроков на героях', player_hero_exp:'Опыт на героях', player_hero_w:'Требовательные герои', exec:'Исполнение драфта', complexity:'Сложность драфта',
+  ph_perf:'Личная игра на героях', hero_lane:'Сила героев на линии', gold_now:'Золото сейчас', radiant_side:'Сторона Radiant'};
+const CONF = {'высокая':'#C6F24E', 'средняя':'#F5B83D', 'низкая':'#6B717C'};
+const WD = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+const MON = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+
+// ---------------------------------------------------------------- подсказки, уведомления
+function toast(msg, kind) {
+  const t = document.createElement('div'); t.className = 'toast ' + (kind || ''); t.textContent = msg;
+  $('#toasts').appendChild(t); setTimeout(() => t.remove(), kind === 'err' ? 7000 : 4500);
+}
+const fail = e => toast(e.message || String(e), 'err');
+const tip = $('#tip');
+document.addEventListener('mousemove', e => {
+  const el = e.target.closest && e.target.closest('[data-tip]');
+  $$('svg .xh, svg .xd').forEach(x => x.style.opacity = 0);
+  if (!el) { tip.style.opacity = '0'; return; }
+  if (el.dataset.cx) { const svg = el.ownerSVGElement, xh = $('.xh', svg), xd = $('.xd', svg);
+    if (xh) { xh.setAttribute('x1', el.dataset.cx); xh.setAttribute('x2', el.dataset.cx); xh.style.opacity = 1; }
+    if (xd) { xd.setAttribute('cx', el.dataset.cx); xd.setAttribute('cy', el.dataset.cy); xd.style.opacity = 1; } }
+  tip.innerHTML = el.dataset.tip; tip.style.opacity = '1';
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.max(8, Math.min(window.innerWidth - w - 12, e.clientX + 14)) + 'px';
+  tip.style.top = Math.max(8, e.clientY - h - 12) + 'px';
+});
+
+// ---------------------------------------------------------------- общие блоки
+function monogram(name) {
+  const s = String(name || '?').replace(/^team\s+/i, '').replace(/\s+(gaming|esports|team)$/i, '').trim() || String(name);
+  const w = s.split(/\s+/);
+  return (w.length === 1 ? (s.length <= 4 ? s : s.slice(0, 3)) : w.map(x => x[0]).join('').slice(0, 4)).toUpperCase();
+}
+const short = name => String(name || '').replace(/^team\s+/i, '').replace(/\s+(gaming|esports)$/i, '') || name;
+function logo(url, name, size, color) {
+  const m = esc(monogram(name));
+  const st = `width:${size}px;height:${size}px;border-radius:${Math.round(size / 4)}px;font-size:${Math.max(8, Math.round(size / 4.2))}px;${color ? `border:${size >= 56 ? 2 : 1}px solid ${color}` : ''}`;
+  return `<span class="logo" style="${st}" data-m="${m}">${url ? `<img src="${esc(url)}" alt="" loading="lazy" onerror="this.parentNode.textContent=this.parentNode.dataset.m">` : m}</span>`;
+}
+const heroById = {}, heroByName = {};
+function heroPic(id, cls) {
+  const h = heroById[id];
+  if (!h) return `<span class="hp ${cls || ''}">?</span>`;
+  return `<span class="hp ${cls || ''}" data-tip="${esc(h.name)}"><img src="${HERO_CDN}${h.key}.png" alt="${esc(h.name)}" loading="lazy" onerror="this.remove()"></span>`;
+}
+const formSq = (list, n, big, rev) => { const xs = (list || []).slice(0, n).map(w => `<span class="form ${big ? 'lg ' : ''}${w ? 'w' : 'l'}">${w ? 'В' : 'П'}</span>`); return (rev ? xs.reverse() : xs).join(''); };
+const bar = (pa, h, pd) => `<div class="bar" style="${h ? `height:${h}px;border-radius:${h / 2}px` : ''}"><span style="width:${100 * pa}%"></span>${pd ? `<i style="width:${100 * pd}%"></i>` : ''}</div>`;
+const confChip = (v, extra) => v ? `<span class="chip" ${extra || ''} ${(v.reliability_reasons || []).length ? `data-tip="${esc(v.reliability_reasons.join('; '))}"` : ''}><span class="dot" style="background:${CONF[v.reliability] || '#6B717C'}"></span>данные: ${esc(v.reliability)}</span>` : '';
+const legend = (A, B) => `<span style="display:flex;gap:14px;font-size:12px;color:var(--t3);flex-wrap:wrap"><span style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:var(--a)"></span>в пользу ${esc(short(A))}</span><span style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:var(--b)"></span>в пользу ${esc(short(B))}</span></span>`;
+function recHtml(text, bet, extra) {
+  const cls = bet ? 'bet' : (/^СТАВИТЬ/.test(text) ? 'cond' : 'skip');
+  const m = /^(СТАВКА|СТАВИТЬ|ПРОПУСК):?\s*(.*)$/s.exec(text || '') || [null, '', text || ''];
+  const lbl = {СТАВКА:'Ставка', СТАВИТЬ:'Ставить при условии', ПРОПУСК:'Пропуск'}[m[1]] || 'Рекомендация';
+  return `<div class="rec ${cls}">${I[cls]}<div><span class="k">${lbl}</span>${esc(m[2])}${extra || ''}</div></div>`;
+}
+const recFull = v => v && v.recommendation ? recHtml(v.recommendation, v.bet, v.bet && v.stake ? ` <b class="mono" style="color:var(--text)">· ${rub(v.stake)}</b>` : '') : '';
+const warnHtml = ws => (ws || []).map(w => `<div class="warn">${I.warn}<span>${esc(w)}</span></div>`).join('');
+const FAVOR = {weak: -1, dip: -1, new: -1, team: -1, up: 1, key: 0, note: 0};
+function lineDot(l) { const f = FAVOR[l.kind] || 0; if (!f) return 'var(--dim)'; return ((l.team === 'a') === (f > 0)) ? 'var(--a)' : 'var(--b)'; }
+function lineHtml(l) { const i = l.text.indexOf(':'), j = l.text.indexOf(' — ');
+  const cut = [i, j].filter(x => x > 0 && x < 60).sort((x, y) => x - y)[0];
+  return `<li><span class="dot" style="background:${lineDot(l)}"></span><span>${cut ? `<b>${esc(l.text.slice(0, cut))}</b>${esc(l.text.slice(cut))}` : esc(l.text)}</span></li>`; }
+function factors(list, A, B, small) {
+  const mx = Math.max(0.05, ...list.map(f => Math.abs(f.v)));
+  return list.map(f => `<div class="fac ${small ? 's' : ''}" data-tip="<b>${esc(f.name)}</b><br>в пользу ${esc(f.v >= 0 ? A : B)}: ${Math.abs(f.v).toFixed(2)} логита"><span class="nm">${esc(f.name)}</span>
+    <span class="lh"><i style="width:${f.v > 0 ? Math.max(1.5, 100 * f.v / mx) : 0}%"></i></span><span class="rh"><i style="width:${f.v < 0 ? Math.max(1.5, -100 * f.v / mx) : 0}%"></i></span>
+    <span class="mono val" style="color:${f.v >= 0 ? 'var(--at)' : 'var(--bt)'}">${f.v >= 0 ? '+' : '−'}${Math.abs(f.v).toFixed(2)}</span></div>`).join('');
+}
+function draftOnly(r, full) {
+  const d = r.draft_only; if (!d) return '';
+  const A = r.team_a.name, B = r.team_b.name, m = STATUS && STATUS.model, diff = 100 * (r.p - d.p);
+  const acc = m && m.acc_draft ? `Сам по себе драфт угадывает ${pct(m.acc_draft)} карт, полная модель — ${pct(m.acc_post)}.` : '';
+  const head = `<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap" data-tip="Отдельная модель только по героям: мета, синергии, контры, сила на линии${r.side !== 'unknown' ? ' и сторона' : ''}.<small>Команды, игроки и их опыт на героях не учитываются. ${acc}</small>">
+      <span class="lbl" style="flex-shrink:0">Чисто пик</span><span class="mono ca" style="font-size:18px;font-weight:700">${pct(d.p)}</span>
+      <span style="flex:1;min-width:120px">${bar(d.p, 8)}</span><span class="mono cb" style="font-size:18px;font-weight:700">${pct(1 - d.p)}</span></div>`;
+  if (!full) return `<div class="why" style="padding:14px 18px;gap:8px">${head}<span style="font-size:12px;color:var(--muted)">Без учёта команд и игроков. ${Math.abs(diff) < 0.5 ? 'Совпадает с полным прогнозом' : `Команды и игроки сдвигают прогноз на ${Math.abs(diff).toFixed(1)} п.п. в пользу ${esc(short(diff > 0 ? A : B))}`}.</span></div>`;
+  const fs = Object.entries(d.contributions).filter(([k]) => k !== 'intercept').map(([k, v]) => ({name: FEATURE[k] || k, v})).sort((x, y) => Math.abs(y.v) - Math.abs(x.v));
+  return `<section class="card pad col" style="gap:16px"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2 class="h2">Чисто пик: без команд и игроков</h2>${legend(A, B)}</div>
+    <div class="col" style="gap:10px"><div class="big"><span class="disp n ca" style="font-size:40px">${pct(d.p)}</span><span class="lbl mid">кто бы ни играл</span><span class="disp n cb" style="font-size:40px">${pct(1 - d.p)}</span></div>${bar(d.p, 10)}</div>
+    <div class="tiles"><div class="tile"><span class="lbl">Полный прогноз</span><span class="mono v"><span class="ca">${pct(r.p)}</span> <span style="color:#4A505A">/</span> <span class="cb">${pct(1 - r.p)}</span></span><span class="s">с командами и игроками</span></div>
+      <div class="tile"><span class="lbl">Вклад команд и игроков</span><span class="mono v" style="color:${diff >= 0 ? 'var(--at)' : 'var(--bt)'}">${diff >= 0 ? '+' : '−'}${Math.abs(diff).toFixed(1)} п.п.</span><span class="s">в пользу ${esc(short(diff >= 0 ? A : B))}</span></div>
+      <div class="tile"><span class="lbl">Пик на Radiant / Dire</span><span class="mono v">${pct(d.p_radiant)} <span style="color:#4A505A">/</span> ${pct(d.p_dire)}</span><span class="s">${esc(short(A))} на каждой стороне</span></div>
+      <div class="tile"><span class="lbl">Справедливый кэф по пику</span><span class="mono v"><span class="ca">${fair(d.p)}</span> <span style="color:#4A505A">/</span> <span class="cb">${fair(1 - d.p)}</span></span></div></div>
+    <div class="col" style="gap:6px">${factors(fs, A, B)}</div>
+    <p style="font-size:13px;line-height:1.5;color:var(--muted)">Отдельная модель только по героям: винрейт в про-мете, пары внутри пятёрки, пары против соперника, сила героев на линии. ${acc} Поэтому оценка редко уходит дальше 40–60%: это поправка к прогнозу, а не самостоятельный повод для ставки.</p></section>`;
+}
+function md(text) {
+  const inl = s => s.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`([^`]+)`/g, '<code>$1</code>').replace(/(^|[\s(])\*([^*\s][^*]*?)\*/g, '$1<i>$2</i>');
+  let out = '', list = null, para = [], tbl = [];
+  const flush = () => { if (para.length) { out += `<p>${inl(para.join(' '))}</p>`; para = []; }
+    if (list) { out += `<${list.t}>${list.items.map(x => `<li>${inl(x)}</li>`).join('')}</${list.t}>`; list = null; }
+    if (tbl.length) { const rows = tbl.filter(r => !/^\|[\s:|-]+\|?$/.test(r)).map(r => r.replace(/^\||\|$/g, '').split('|').map(c => c.trim()));
+      out += `<div class="scroll"><table>${rows.map((r, i) => `<tr>${r.map(c => i ? `<td>${inl(c)}</td>` : `<th>${inl(c)}</th>`).join('')}</tr>`).join('')}</table></div>`; tbl = []; } };
+  for (const raw of esc(text).split('\n')) {
+    const line = raw.replace(/\s+$/, ''); let m;
+    if (!line.trim()) { flush(); continue; }
+    if (/^\s*\|/.test(line)) { if (!tbl.length) flush(); tbl.push(line.trim()); continue; }
+    if ((m = /^#{1,5}\s+(.*)$/.exec(line))) { flush(); out += `<h4>${inl(m[1])}</h4>`; continue; }
+    if ((m = /^\s*[-*]\s+(.*)$/.exec(line))) { if (!list || list.t !== 'ul') { flush(); list = {t: 'ul', items: []}; } list.items.push(m[1]); continue; }
+    if ((m = /^\s*\d+[.)]\s+(.*)$/.exec(line))) { if (!list || list.t !== 'ol') { flush(); list = {t: 'ol', items: []}; } list.items.push(m[1]); continue; }
+    if (list && /^\s+/.test(raw)) { list.items[list.items.length - 1] += ' ' + line.trim(); continue; }
+    if (list) flush();
+    para.push(line.trim());
+  }
+  flush(); return out;
+}
+// линия с перекрестием: pts [{x, y, tip}] в координатах данных
+function lineSvg(o) {
+  const {W, H, L = 40, R = 14, T = 16, B = 34, pts, x0, x1, y0, y1, color} = o;
+  const X = v => L + (v - x0) / Math.max(1e-9, x1 - x0) * (W - L - R), Y = v => T + (y1 - v) / (y1 - y0) * (H - T - B);
+  const P = pts.map(p => ({...p, cx: X(p.x), cy: Y(p.y)}));
+  const hit = P.map((p, i) => { const a = i ? (P[i - 1].cx + p.cx) / 2 : L, b = i < P.length - 1 ? (P[i + 1].cx + p.cx) / 2 : W - R;
+    return `<rect x="${a.toFixed(1)}" y="${T}" width="${Math.max(1, b - a).toFixed(1)}" height="${H - T - B}" fill="transparent" data-cx="${p.cx.toFixed(1)}" data-cy="${p.cy.toFixed(1)}" data-tip="${p.tip}"/>`; }).join('');
+  const last = P[P.length - 1];
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;max-width:${o.maxW || W}px;align-self:center" role="img" aria-label="${esc(o.label || '')}">
+    ${(o.yTicks || []).map(t => `<line x1="${L}" x2="${W - R}" y1="${Y(t.v)}" y2="${Y(t.v)}" stroke="${t.dash ? '#3A3F48' : '#1E2228'}" ${t.dash ? `stroke-dasharray="${t.dash}"` : ''}/>${t.right ? `<text x="${W - R}" y="${Y(t.v) - 6}" text-anchor="end" style="font-family:Manrope,sans-serif;fill:#858C98">${t.text}</text>` : `<text x="${L - 8}" y="${Y(t.v) + 4}" text-anchor="end">${t.text}</text>`}`).join('')}
+    ${(o.xTicks || []).map(t => `<text x="${X(t.v)}" y="${H - B + 20}" text-anchor="middle">${t.text}</text>`).join('')}
+    <polyline points="${P.map(p => p.cx.toFixed(1) + ',' + p.cy.toFixed(1)).join(' ')}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${o.dots ? P.map(p => `<circle cx="${p.cx.toFixed(1)}" cy="${p.cy.toFixed(1)}" r="3" fill="${color}"/>`).join('') : ''}
+    ${last ? `<circle cx="${last.cx.toFixed(1)}" cy="${last.cy.toFixed(1)}" r="5" fill="${color}" stroke="#131519" stroke-width="2"/><text x="${(last.cx + 10).toFixed(1)}" y="${(last.cy + 4).toFixed(1)}" text-anchor="start" style="font-size:12px;font-weight:700;fill:${o.textColor || color}">${o.lastText || ''}</text>` : ''}
+    <line class="xh" y1="${T}" y2="${H - B}"/><circle class="xd" r="5" fill="${color}" stroke="#ECEEF1" stroke-width="2"/>${hit}</svg>`;
+}
+
+// ---------------------------------------------------------------- статус, шапка
+let STATUS = null;
+async function loadStatus() {
+  try {
+    const s = STATUS = await api('/api/status');
+    const built = s.model && s.model.built, age = built ? (Date.now() / 1000 - built) / 3600 : null;
+    const ageTxt = age == null ? 'модель не обучена' : 'модель обновлена ' + (age < 1 ? 'только что' : (age < 48 ? Math.round(age) + ' ч назад' : Math.round(age / 24) + ' дн назад'));
+    $('#modelChip').innerHTML = `<span class="dot" style="background:${age == null ? 'var(--red)' : (age < 30 ? 'var(--lime)' : 'var(--amber)')}"></span>${s.sync.running ? 'идёт синхронизация…' : ageTxt}`;
+    if (s.model) { $('#accChip').hidden = false; $('#accChip').textContent = 'точность ' + pct(s.model.acc_post); }
+    $('#footData').textContent = `Данные: OpenDota · ${num(s.db.matches)} матчей · последний ${dmy(s.db.last_start_time)}`;
+    renderPop();
+    if (s.sync.running) setTimeout(loadStatus, 4000);
+    else if (syncing) { syncing = false; toast('База обновлена, модель переобучена', 'ok'); route(); }
+  } catch (e) { $('#modelChip').innerHTML = '<span class="dot" style="background:var(--red)"></span>сервер недоступен'; }
+}
+let syncing = false;
+function renderPop() {
+  const s = STATUS; if (!s) return;
+  const yn = (v, a, b) => `<b style="color:${v ? 'var(--lime)' : 'var(--t3)'}">${v ? a : b}</b>`;
+  $('#statusPop').innerHTML = `<span class="lbl">Состояние</span>
+    <div class="kv"><span>Матчей в базе</span><b>${num(s.db.matches)}</b></div>
+    <div class="kv"><span>Последний матч</span><b>${dmy(s.db.last_start_time)}</b></div>
+    <div class="kv"><span>Синхронизация</span><b>${s.last_sync ? dm(s.last_sync) + ' ' + hm(s.last_sync) : 'не было'}</b></div>
+    <div class="kv"><span>Запросы OpenDota за сутки</span><b>${s.budget.used} / ${s.budget.per_day}</b></div>
+    <div class="kv"><span>Claude</span>${yn(s.claude, 'доступен', 'не найден')}</div>
+    <div class="kv" data-tip="Переменная окружения ODDSPAPI_KEY"><span>Эталонная линия</span>${yn(s.sources.odds, 'подключена', 'кэфы вручную')}</div>
+    <div class="kv" data-tip="Переменная окружения STEAM_API_KEY"><span>Live из Steam</span>${yn(s.sources.steam, 'подключён', 'OpenDota, отстаёт')}</div>
+    <div class="kv" data-tip="TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID"><span>Уведомления</span>${yn(s.sources.telegram, 'включены', 'выключены')}</div>
+    ${s.sync.running ? `<div class="log">${esc(s.sync.log.slice(-4).join('\n'))}</div>` : ''}
+    <button class="btn pri sm" id="syncBtn" ${s.sync.running ? 'disabled' : ''} data-tip="Свежие матчи из OpenDota и переобучение модели, около 5 минут">${s.sync.running ? 'Синхронизация…' : 'Синхронизировать и переобучить'}</button>`;
+  $('#syncBtn').onclick = async () => { try { syncing = true; await api('/api/sync', {fresh: 150, train: true}); setTimeout(loadStatus, 1500); } catch (e) { syncing = false; fail(e); } };
+}
+$('#modelChip').onclick = e => { e.stopPropagation(); $('#statusPop').hidden = !$('#statusPop').hidden; };
+document.addEventListener('click', e => { if (!e.target.closest('#statusPop')) $('#statusPop').hidden = true; });
+
+let LIVE = {games: [], source: null, error: null, ts: 0};
+async function loadLive(force) {
+  if (!force && Date.now() - LIVE.ts < 25000) return LIVE;
+  const r = await api('/api/live');
+  LIVE = {games: r.games.filter(g => g.team_id_radiant && g.team_id_dire), source: r.source, error: r.error, ts: Date.now()};
+  $('#liveCount').textContent = LIVE.games.length || '';
+  return LIVE;
+}
+
+// ---------------------------------------------------------------- боковые панели разбора
+const RAILS = {cfg: null, on: false, pick: {l: null, r: null}};
+const railsWanted = () => { try { return localStorage.getItem('rails') !== '0'; } catch (e) { return true; } };
+function railItem(it) {
+  if (it.type === 'youtube') { const id = encodeURIComponent(it.id);
+    return `<iframe class="${it.aspect === '9:16' ? '' : 'cover'}" src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1" title="${esc(it.title || '')}" allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe>`; }
+  if (it.type === 'video') return `<video src="${esc(it.src)}" autoplay muted loop playsinline></video>`;
+  return `<a class="ad" href="${esc(it.link || '#')}" target="_blank" rel="noopener sponsored" style="${it.image ? `background-image:url('${esc(it.image)}')` : ''}"><span class="chip" style="align-self:flex-start">${esc(it.label || 'Реклама')}</span>
+    ${it.title ? `<span class="disp" style="font-size:16px;font-weight:700;line-height:1.3">${esc(it.title)}</span>` : ''}${it.text ? `<span style="font-size:13px;color:var(--t2);line-height:1.45">${esc(it.text)}</span>` : ''}</a>`;
+}
+function renderRail(side) {
+  const box = $(side === 'l' ? '#railL' : '#railR'), items = RAILS.cfg[side === 'l' ? 'left' : 'right'] || [];
+  if (!items.length) { box.innerHTML = ''; return; }
+  if (RAILS.pick[side] == null || !items[RAILS.pick[side]]) RAILS.pick[side] = Math.floor(Math.random() * items.length);
+  box.innerHTML = `<div class="frame">${railItem(items[RAILS.pick[side]])}</div><div class="bar2">${items.length > 1 ? items.map((it, i) => `<button class="chip ${i === RAILS.pick[side] ? 'on' : ''}" data-i="${i}">${esc(it.title || (it.type === 'ad' ? 'Реклама' : 'Видео ' + (i + 1)))}</button>`).join('') : `<span class="muted small">${esc(items[0].title || '')}</span>`}
+    <button class="chip" data-off style="margin-left:auto" data-tip="Убрать боковые видео. Вернуть — кнопкой «Фон» в шапке разбора">✕</button></div>`;
+  $$('[data-i]', box).forEach(b => b.onclick = () => { RAILS.pick[side] = +b.dataset.i; renderRail(side); });
+  $('[data-off]', box).onclick = () => setRails(false, true);
+}
+async function setRails(on, remember) {
+  if (remember) { try { localStorage.setItem('rails', on ? '1' : '0'); } catch (e) {} }
+  if (on && !RAILS.cfg) { try { RAILS.cfg = await api('/api/rails'); if (RAILS.cfg.error) toast(RAILS.cfg.error, 'err'); } catch (e) { RAILS.cfg = {enabled: false}; } }
+  on = !!(on && RAILS.cfg && RAILS.cfg.enabled && window.innerWidth >= 1600);
+  if (on !== RAILS.on) {
+    RAILS.on = on; document.body.classList.toggle('rails', on);
+    if (on) { renderRail('l'); renderRail('r'); } else { $('#railL').innerHTML = ''; $('#railR').innerHTML = ''; }
+  }
+  const b = $('#railBtn'); if (b) b.classList.toggle('lime', on);
+}
+window.addEventListener('resize', () => { if (location.hash.startsWith('#match')) setRails(railsWanted()); });
+
+// ---------------------------------------------------------------- маршруты
+let seq = 0, timers = [];
+const every = (ms, fn) => timers.push(setInterval(fn, ms));
+const ALIAS = {forecast: 'feed', backtest: 'accuracy', series: 'tournaments'};
+function route() {
+  const h = decodeURIComponent(location.hash.slice(1)).split('/');
+  let name = ALIAS[h[0]] || h[0] || 'feed';
+  if (!VIEWS[name]) name = 'feed';
+  $$('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === (name === 'match' ? 'feed' : name)));
+  timers.forEach(clearInterval); timers = [];
+  if (es) { es.close(); es = null; }
+  seq++;
+  setRails(name === 'match' && railsWanted());
+  VIEWS[name](h.slice(1), seq).catch(e => { $('#view').innerHTML = `<div class="empty">${esc(e.message || e)}</div>`; });
+}
+window.addEventListener('hashchange', () => { window.scrollTo(0, 0); route(); });
+const view = (html, s) => { if (s === seq) $('#view').innerHTML = html; return s === seq; };
+
+// ================================================================ ПРОГНОЗЫ
+const F = {day: 'today', fmt: 0, tour: '', high: false, items: [], hist: [], settings: null, built: 0};
+const dayStart = off => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime() / 1000 + off * 86400; };
+const pairKey = (a, b) => a + '/' + b;
+function relTime(ts) { const d = ts - Date.now() / 1000; if (d <= 0) return ''; const h = Math.floor(d / 3600), m = Math.round((d % 3600) / 60);
+  return d < 86400 ? ` · через ${h ? h + ' ч ' : ''}${m} мин` : ''; }
+const topScore = f => (f.scores || []).slice().sort((x, y) => y.p - x.p)[0];
+function fcDay(f) { if (f.status === 'идёт' || !f.starts) return 'today'; return f.starts >= dayStart(1) ? 'tomorrow' : (f.starts < dayStart(0) ? 'today' : 'today'); }
+function dayItems(day) {
+  const fc = F.items.filter(f => !f.error && fcDay(f) === day).map(f => ({kind: 'fc', f, ts: f.starts, bo: f.bo, tour: f.tournament, conf: f.verdict.reliability}));
+  const lo = dayStart(day === 'yesterday' ? -1 : (day === 'today' ? 0 : 1)), hi = lo + 86400;
+  const hs = F.hist.filter(h => h.ts >= lo && h.ts < hi).map(h => ({kind: 'hist', h, ts: h.ts, bo: h.bo, tour: h.tournament, conf: null}));
+  return day === 'tomorrow' ? fc : (day === 'yesterday' ? hs : fc.concat(hs));
+}
+const passes = x => (!F.fmt || x.bo === F.fmt) && (!F.tour || x.tour === F.tour) && (!F.high || x.kind === 'hist' || x.conf === 'высокая');
+
+const VIEWS = {};
+VIEWS.feed = async (args, s) => {
+  const d = new Date();
+  view(`<div class="headrow" style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px">
+      <div class="col" style="gap:10px"><div class="lbl">${WD[d.getDay()]}, ${d.getDate()} ${MON[d.getMonth()]}</div>
+        <h1 class="disp" style="font-size:40px;font-weight:700;line-height:1.1" id="feedTitle">Прогнозы на сегодня</h1>
+        <p style="font-size:15px;line-height:1.55;color:var(--t3);max-width:640px">Вероятность победы для каждой серии. ${STATUS ? `Модель обучена на ${num(STATUS.db.matches)} матчах и` : 'Модель'} пересчитывает прогноз, когда меняются составы и после драфта.</p></div>
+      <div class="segs" role="tablist" aria-label="День" id="daySeg"></div></div>
+    <div class="filters" style="display:flex;align-items:center;gap:8px" id="feedFilters"></div>
+    <div class="two"><div class="col" style="gap:24px" id="feedMain"><div class="skel" style="height:420px"></div><div class="skel"></div></div>
+      <aside class="col" style="gap:20px" id="feedSide"></aside></div>`, s);
+  renderFeedSide();
+  const load = async () => {
+    const [fc, hs] = await Promise.all([api('/api/forecasts'), api('/api/history?days=3')]);
+    if (s !== seq) return;
+    F.items = fc.items; F.settings = fc.settings; F.built = fc.built; F.hist = hs.items;
+    renderFeed();
+  };
+  await load();
+  loadLive().then(() => s === seq && renderFeedSide()).catch(() => {});
+  every(60000, () => { if (!document.activeElement.matches('input, textarea, select')) { load().catch(() => {}); loadLive().then(() => s === seq && renderFeedSide()).catch(() => {}); } });
+};
+function renderFeed() {
+  const cnt = day => dayItems(day).length;
+  const days = [['yesterday', 'Вчера'], ['today', 'Сегодня'], ['tomorrow', 'Завтра']];
+  $('#daySeg').innerHTML = days.map(([k, t]) => `<button class="seg ${F.day === k ? 'on' : ''}" role="tab" data-day="${k}" ${F.day === k ? 'aria-selected="true"' : ''}>${t}${cnt(k) ? ` <span class="mono" style="font-size:12px;color:${F.day === k ? 'var(--lime)' : 'var(--muted)'}">${cnt(k)}</span>` : ''}</button>`).join('');
+  $$('#daySeg .seg').forEach(b => b.onclick = () => { F.day = b.dataset.day; renderFeed(); });
+  $('#feedTitle').textContent = {yesterday: 'Прогнозы за вчера', today: 'Прогнозы на сегодня', tomorrow: 'Прогнозы на завтра'}[F.day];
+  const all = dayItems(F.day);
+  const tours = [...new Set(all.map(x => x.tour).filter(Boolean))].sort();
+  if (F.tour && !tours.includes(F.tour)) F.tour = '';
+  const fmts = [...new Set([1, 3, 5].concat(all.map(x => x.bo)))].sort();
+  $('#feedFilters').innerHTML = `<button class="fchip ${!F.fmt ? 'on' : ''}" data-fmt="0">Все форматы</button>${fmts.map(b => `<button class="fchip ${F.fmt === b ? 'on' : ''}" data-fmt="${b}">bo${b}</button>`).join('')}
+    <span style="width:1px;height:24px;background:var(--line2);margin:0 8px;flex-shrink:0"></span>
+    <select class="fchip" id="tourSel" aria-label="Турнир"><option value="">Все турниры</option>${tours.map(t => `<option ${F.tour === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>
+    <label class="ck" style="margin-left:auto"><input type="checkbox" id="highOnly" ${F.high ? 'checked' : ''}>Только при высокой уверенности данных</label>`;
+  $$('#feedFilters [data-fmt]').forEach(b => b.onclick = () => { F.fmt = +b.dataset.fmt; renderFeed(); });
+  $('#tourSel').onchange = e => { F.tour = e.target.value; renderFeed(); };
+  $('#highOnly').onchange = e => { F.high = e.target.checked; renderFeed(); };
+
+  const items = all.filter(passes);
+  const open = items.filter(x => x.kind === 'fc' && x.f.status !== 'сыграна');
+  const top = open.slice().sort((x, y) => (y.f.tier === 'premium') - (x.f.tier === 'premium') || (y.f.roster_elo_a + y.f.roster_elo_b) - (x.f.roster_elo_a + x.f.roster_elo_b))[0];
+  const rest = items.filter(x => x !== top);
+  const now = Date.now() / 1000;
+  const groups = [['Идут сейчас', x => x.kind === 'fc' && x.f.status === 'идёт'], ['Ближайшие 3 часа', x => x.kind === 'fc' && x.ts && x.ts - now < 3 * 3600 && x.f.status !== 'сыграна'],
+    [F.day === 'today' ? 'Позже сегодня' : 'По расписанию', x => x.kind === 'fc' && x.ts && x.f.status !== 'сыграна'], ['Время не указано', x => x.kind === 'fc' && x.f.status !== 'сыграна'], ['Уже сыграны', x => true]];
+  const used = new Set(); let list = '';
+  for (const [title, fn] of groups) {
+    const g = rest.filter(x => !used.has(x) && fn(x)); g.forEach(x => used.add(x));
+    g.sort((x, y) => x.kind === 'hist' ? y.ts - x.ts : (x.ts || 0) - (y.ts || 0));
+    if (g.length) list += `<div class="lbl sect">${title}</div>` + g.map(rowHtml).join('');
+  }
+  const errs = F.items.filter(f => f.error);
+  $('#feedMain').innerHTML = (top ? heroCard(top.f) : '') +
+    (list ? `<section class="card" style="padding:8px 0"><div style="padding:16px 24px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <h2 class="h2">${top ? 'Остальные матчи' : 'Матчи'}</h2><span style="font-size:13px;color:var(--muted)">вероятность победы в серии · ${F.day === 'yesterday' ? 'счёт · итог прогноза' : 'вероятный счёт · уверенность'}</span></div>${list}</section>` : '') +
+    (!top && !list ? `<div class="empty">${all.length ? 'Под фильтры ничего не подходит.' : (F.day === 'yesterday' ? 'Вчера серий в базе нет.' : 'На этот день серий нет. Матчи добавляются в разделе <a href="#tournaments">«Турниры»</a>; серии, которые уже идут, появятся сами после синхронизации.')}</div>` : '') +
+    errs.map(f => `<div class="warn">${I.warn}<span>${esc(f.name_a)} — ${esc(f.name_b)}: ${esc(f.error)}</span></div>`).join('');
+}
+function heroCard(f) {
+  const pa = f.p_bet, pd = f.p_draw || 0, pb = 1 - pa - pd, ts = topScore(f), live = f.status === 'идёт';
+  const first = f.p_map >= 0.5 ? [f.name_a, f.p_map] : [f.name_b, 1 - f.p_map];
+  const lines = (f.players.lines || []).filter(l => l.kind !== 'note').slice(0, 3);
+  const bullets = lines.length ? lines.map(lineHtml).join('') : f.top.slice(0, 3).map(t => `<li><span class="dot" style="background:${t[1] >= 0 ? 'var(--a)' : 'var(--b)'}"></span><span><b>${esc(FEATURE[t[0]] || t[0])}:</b> ${t[1] >= 0 ? '+' : '−'}${Math.abs(t[1]).toFixed(2)} в пользу ${esc(t[1] >= 0 ? f.name_a : f.name_b)}.</span></li>`).join('');
+  const href = `#match/${f.team_a}/${f.team_b}`;
+  return `<article class="card pad col" style="gap:24px">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="chip lime">Матч дня</span>
+      ${live ? `<span class="chip live"><span class="dot" style="background:var(--red)"></span>идёт · ${f.lead_a}:${f.lead_b}</span>` : (f.starts ? `<span class="chip mono">${hm(f.starts)}${TZ}${relTime(f.starts)}</span>` : '')}
+      <span class="chip">bo${f.bo}</span><span class="chip">${f.tier === 'premium' ? 'LAN' : 'онлайн'}</span>${f.tournament ? `<span class="chip">${esc(f.tournament)}</span>` : ''}
+      ${confChip(f.verdict, 'style="margin-left:auto"')}</div>
+    <div class="vs">
+      <div class="t">${logo(f.logo_a, f.name_a, 56, 'var(--a)')}<div class="meta"><div class="disp name" style="font-size:22px;font-weight:600">${esc(f.name_a)}</div>
+        <div class="fl">рейтинг <span class="mono" style="color:var(--t2);margin-right:8px">${f.roster_elo_a}</span>${formSq(f.form_a, 5)}</div></div></div>
+      <span class="lbl mid">против</span>
+      <div class="t r">${logo(f.logo_b, f.name_b, 56, 'var(--b)')}<div class="meta"><div class="disp name" style="font-size:22px;font-weight:600">${esc(f.name_b)}</div>
+        <div class="fl">${formSq(f.form_b, 5, false, true)}<span style="margin-left:8px">рейтинг</span> <span class="mono" style="color:var(--t2)">${f.roster_elo_b}</span></div></div></div>
+    </div>
+    <div class="col" style="gap:10px"><div class="big"><span class="disp n ca">${pct(pa)}</span><span class="lbl mid">${f.bo > 1 ? 'победа в серии' : 'победа на карте'}${pd ? ' · ничья ' + p0(pd) : ''}</span><span class="disp n cb">${pct(pb)}</span></div>${bar(pa, 10, pd)}</div>
+    <div class="t3cols" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+      <div class="tile"><span class="lbl">Вероятный счёт</span><span class="mono v">${ts ? ts.score.replace('-', ':') + ` <small>${p0(ts.p)}</small>` : '—'}</span></div>
+      <div class="tile"><span class="lbl">${live ? 'Следующая карта' : 'Первая карта'}</span><span class="mono v">${esc(short(first[0]))} <small>${p0(first[1])}</small></span></div>
+      <div class="tile"><span class="lbl">Справедливый кэф</span><span class="mono v"><span class="ca">${fair(pa)}</span> <span style="color:#4A505A">/</span> <span class="cb">${fair(pb)}</span></span></div>
+    </div>
+    <div class="why"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span class="lbl">Почему так</span>${legend(f.name_a, f.name_b)}</div>
+      <div style="font-size:17px;font-weight:700;line-height:1.45">${esc(f.verdict.text)}.</div><ul class="bul">${bullets}</ul>${warnHtml(f.warnings)}</div>
+    ${recFull(f.verdict)}
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><a class="btn pri" href="${href}">Полный разбор${I.arrow}</a>
+      <span style="font-size:13px;color:var(--muted)">прогноз ${f.mode === 'post' ? 'с учётом драфта' : 'уточнится после драфта'} · обновлён в ${hm(F.built)}</span></div>
+  </article>`;
+}
+function rowHtml(x) {
+  if (x.kind === 'hist') { const h = x.h, aw = h.score_a > h.score_b;
+    return `<a class="row" href="#match/${h.team_a}/${h.team_b}"><span class="tm"><span class="mono" style="font-size:14px;font-weight:600">${hm(h.ts)}</span><span class="mono" style="font-size:11px;color:var(--muted)">bo${h.bo}</span></span>
+      <span class="ta"><span style="color:${aw ? 'var(--text)' : 'var(--t3)'}">${esc(h.name_a)}</span>${logo(h.logo_a, h.name_a, 32)}</span>
+      <span class="pp"><span class="mono" style="display:flex;justify-content:space-between;font-size:14px;font-weight:700"><span class="ca">${pct(h.p_a)}</span><span class="cb">${pct(h.p_b)}</span></span>${bar(h.p_a, 0, 1 - h.p_a - h.p_b)}</span>
+      <span class="tb">${logo(h.logo_b, h.name_b, 32)}<span style="color:${!aw && h.score_a !== h.score_b ? 'var(--text)' : 'var(--t3)'}">${esc(h.name_b)}</span></span>
+      <span class="sc">итог <b class="mono" style="color:var(--text)">${h.score_a}:${h.score_b}</b></span>
+      <span class="cf">${h.ok == null ? '<span class="miss">ничья</span>' : (h.ok ? `<span class="ok">${I.ok12}верно</span>` : `<span class="miss">${I.x12}мимо</span>`)}</span>${I.chev}</a>`; }
+  const f = x.f, pa = f.p_bet, pd = f.p_draw || 0, pb = 1 - pa - pd, ts = topScore(f), live = f.status === 'идёт', done = f.status === 'сыграна';
+  return `<a class="row" href="#match/${f.team_a}/${f.team_b}"><span class="tm"><span class="mono" style="font-size:14px;font-weight:600;${live ? 'color:var(--redt)' : ''}">${live ? 'идёт' : (f.starts ? (f.starts >= dayStart(2) ? dm(f.starts) : hm(f.starts)) : '—')}</span><span class="mono" style="font-size:11px;color:var(--muted)">bo${f.bo}</span></span>
+    <span class="ta"><span style="color:${pa >= pb ? 'var(--text)' : 'var(--t3)'}">${esc(f.name_a)}</span>${logo(f.logo_a, f.name_a, 32)}</span>
+    <span class="pp"><span class="mono" style="display:flex;justify-content:space-between;font-size:14px;font-weight:700"><span class="ca">${pct(pa)}</span><span class="cb">${pct(pb)}</span></span>${bar(pa, 0, pd)}</span>
+    <span class="tb">${logo(f.logo_b, f.name_b, 32)}<span style="color:${pb > pa ? 'var(--text)' : 'var(--t3)'}">${esc(f.name_b)}</span></span>
+    <span class="sc">${live || done ? `${done ? 'итог' : 'идёт'} <b class="mono" style="color:var(--text)">${f.lead_a}:${f.lead_b}</b>` : `счёт <b class="mono" style="color:var(--text)">${ts ? ts.score.replace('-', ':') : '—'}</b>`}</span>
+    <span class="cf" ${f.verdict.bet ? `data-tip="${esc(f.verdict.recommendation)}"` : ''}>${f.verdict.bet ? `<span class="ok">${String(f.verdict.flats).replace('.', ',')} фл.</span>` : `<span class="dot" style="background:${CONF[f.verdict.reliability]}"></span>${esc(f.verdict.reliability)}`}</span>${I.chev}</a>`;
+}
+function liveCardMini(g) {
+  const p = g.p_now;
+  return `<a class="card plain col" href="#live/${g.match_id}" style="padding:20px;gap:16px;border-color:rgba(255,77,94,.35)">
+    <div style="display:flex;align-items:center;justify-content:space-between"><span class="chip live"><span class="dot" style="background:var(--red)"></span>LIVE${g.radiant_series_wins != null ? ' · карта ' + (g.radiant_series_wins + g.dire_series_wins + 1) : ''}</span>
+      <span class="mono" style="font-size:13px;color:var(--t3)">${g.drafting ? 'драфт' : clock(g.game_time)}</span></div>
+    <div class="col" style="gap:10px">
+      <div style="display:flex;align-items:center;gap:12px">${logo(g.logo_radiant, g.team_name_radiant, 32)}<span style="flex-grow:1;font-size:15px;font-weight:700">${esc(g.team_name_radiant)}</span><span class="mono" style="font-size:20px;font-weight:700">${g.radiant_series_wins != null ? g.radiant_series_wins : g.radiant_score}</span></div>
+      <div style="display:flex;align-items:center;gap:12px">${logo(g.logo_dire, g.team_name_dire, 32)}<span style="flex-grow:1;font-size:15px;font-weight:700">${esc(g.team_name_dire)}</span><span class="mono" style="font-size:20px;font-weight:700">${g.dire_series_wins != null ? g.dire_series_wins : g.dire_score}</span></div></div>
+    ${p != null ? `<div class="col" style="gap:8px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><span class="mono ca" style="font-weight:700;font-size:13px">${pct(p)}</span><span>шанс взять карту</span><span class="mono cb" style="font-weight:700;font-size:13px">${pct(1 - p)}</span></div>${bar(p)}</div>` : ''}
+    <span style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--lime)">Смотреть live-прогноз${I.arrow}</span></a>`;
+}
+const clock = t => Math.floor((t || 0) / 60) + ':' + pad2(Math.floor((t || 0) % 60));
+function accCard() {
+  const m = STATUS && STATUS.model; if (!m) return '';
+  const row = (t, v, c, strong) => `<div class="cmp" style="grid-template-columns:110px minmax(0,1fr) 44px;gap:10px;${strong ? '' : 'color:var(--t3)'}"><span>${t}</span><span class="track"><span class="fill" style="width:${100 * v}%;background:${c}"></span></span><span class="mono" style="text-align:right;${strong ? 'font-weight:700' : ''}">${(100 * v).toFixed(1)}</span></div>`;
+  return `<section class="card col" style="padding:20px;gap:14px"><span class="lbl">Точность модели</span>
+    <div style="display:flex;align-items:baseline;gap:10px"><span class="disp" style="font-size:36px;font-weight:700">${pct(m.acc_post)}</span><span style="font-size:14px;color:var(--t3)">карт угадано</span></div>
+    <p style="font-size:13px;line-height:1.5;color:var(--t3)">Проверено на ${num(m.n)} картах, которых модель не видела при обучении.</p>
+    <div class="col" style="gap:10px">${row('Модель', m.acc_post, 'var(--lime)', true)}${row('Рейтинг команд', m.acc_elo, '#6B717C')}${row('Монетка', 0.5, '#3A3F48')}</div>
+    <a href="#accuracy" style="font-size:14px;font-weight:700">Как мы проверяем →</a></section>`;
+}
+function renderFeedSide() {
+  const box = $('#feedSide'); if (!box) return;
+  const dl = (t, d) => `<div><dt style="font-weight:700;color:var(--text)">${t}</dt><dd style="margin:2px 0 0;color:var(--t3)">${d}</dd></div>`;
+  box.innerHTML = LIVE.games.slice(0, 2).map(liveCardMini).join('') + accCard() +
+    `<section class="card col" style="padding:20px;gap:14px"><span class="lbl">Как читать прогноз</span><dl style="margin:0;display:flex;flex-direction:column;gap:12px;font-size:13px;line-height:1.5">
+      ${dl('Вероятность', 'Шанс команды выиграть серию по оценке модели.')}${dl('Вероятный счёт', 'Самый вероятный итог серии из всех возможных.')}
+      ${dl('Справедливый кэф', '1 / вероятность — коэффициент, который соответствует прогнозу.')}${dl('Уверенность данных', 'Насколько полные и свежие данные о составах: высокая, средняя или низкая.')}
+      ${dl('Флеты', 'Метка «1 фл.» в ленте — политика предлагает ставку по введённым кэфам. Кэфы вводятся в разборе матча, вкладка «Ставка».')}</dl></section>`;
+}
+
+// ================================================================ РАЗБОР МАТЧА
+let M = null, es = null, lastVerdict = null;
+const newMatch = () => ({key: '', a: null, b: null, bo: 3, tier: 'professional', side: 'unknown', market: 'series', leadA: 0, leadB: 0, heroes: {a: ['', '', '', '', ''], b: ['', '', '', '', '']},
+  who: {a: ['', '', '', '', ''], b: ['', '', '', '', '']}, oddsA: '', oddsB: '', ref: null, spec: {}, r: null, tab: 'overview', ctx: null, open: false, ig: null});
+let PENDING = null;                     // состав и герои из live для следующего открытия разбора
+async function loadTeam(id) { const t = await api('/api/team?id=' + id); return {id, name: t.name, info: t, roster: t.roster.map(p => p.id)}; }
+VIEWS.match = async (args, s) => {
+  const a = +args[0], b = +args[1];
+  if (!a || !b) { view(`<div class="empty">Выберите две команды.</div>`, s); openSearch(); return; }
+  if (!M || M.key !== pairKey(a, b)) {
+    M = newMatch(); M.key = pairKey(a, b);
+    view(`<a href="#feed" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--t3)">${I.back}Все прогнозы</a><div class="skel" style="height:380px"></div><div class="skel"></div>`, s);
+    [M.a, M.b] = await Promise.all([loadTeam(a), loadTeam(b)]);
+    const c = F.items.find(f => f.team_a === a && f.team_b === b);
+    if (c) { M.ctx = c; M.bo = c.bo; M.tier = c.tier; M.oddsA = c.odds_a || ''; M.oddsB = c.odds_b || ''; M.leadA = c.lead_a; M.leadB = c.lead_b;
+      if (c.ref_a && c.ref_b) M.ref = {ref_a: c.ref_a, ref_b: c.ref_b, ref_book: c.ref_book}; }
+  }
+  if (args[2] === 'map' || args[2] === 'series') M.market = args[2];
+  if (['overview', 'rosters', 'draft', 'markets', 'h2h', 'bet'].includes(args[2])) M.tab = args[2];
+  if (args[3] && args[4]) { for (const [sd, ids] of [['a', args[3]], ['b', args[4]]]) ids.split(',').forEach((id, i) => { if (i < 5 && heroById[+id]) M.heroes[sd][i] = heroById[+id].name; }); M.tab = 'draft'; }
+  if (args[5]) M.side = args[5];
+  if (PENDING && PENDING.key === M.key) { const p = PENDING; PENDING = null;
+    for (const sd of ['a', 'b']) { if (p.roster[sd].length === 5) M[sd].roster = p.roster[sd]; M.who[sd] = p.who[sd]; }
+    M.leadA = p.leadA; M.leadB = p.leadB; M.ig = p.ig; if (p.bo) M.bo = p.bo; }
+  await calc(s);
+};
+function heroIds(sd) { return M.heroes[sd].map(n => heroByName[String(n).trim().toLowerCase()]).filter(Boolean); }
+function payload() {
+  const o = {team_a: String(M.a.id), team_b: String(M.b.id), lineup_a: M.a.roster, lineup_b: M.b.roster, bo: M.bo, side: M.side, market: M.market, tier: M.tier,
+    lead_a: M.leadA, lead_b: M.leadB, odds_a: M.oddsA || null, odds_b: M.oddsB || null, markets: M.spec};
+  if (M.ref && M.market !== 'map') Object.assign(o, M.ref);
+  for (const sd of ['a', 'b']) { const ids = heroIds(sd); if (!ids.length) continue; o['picks_' + sd] = ids;
+    const as = M.heroes[sd].map((n, i) => [+M.who[sd][i], heroByName[String(n).trim().toLowerCase()]]).filter(x => x[0] && x[1]);
+    if (as.length === 5) o['assign_' + sd] = as; }
+  return o;
+}
+async function calc(s) {
+  s = s || seq;
+  try { const r = await api('/api/predict', payload()); if (s !== seq) return; M.r = r;
+    if ((r.lead_a || r.lead_b) && !M.leadA && !M.leadB) { M.leadA = r.lead_a; M.leadB = r.lead_b; }
+    renderMatch(); }
+  catch (e) { if (s === seq) { fail(e); if (!M.r) view(`<div class="empty">${esc(e.message)}</div>`, s); } }
+}
+function probs() { const r = M.r, isMap = r.market === 'map' || !r.series; const pa = isMap ? r.p : r.series.p_a, pd = isMap ? 0 : (r.series.p_draw || 0); return {isMap, pa, pd, pb: 1 - pa - pd}; }
+function renderMatch() {
+  const r = M.r, A = r.team_a.name, B = r.team_b.name, {isMap, pa, pd, pb} = probs(), c = M.ctx;
+  const ts = r.series ? r.series.scores.slice().sort((x, y) => y.p - x.p)[0] : null;
+  const nxt = r.p >= 0.5 ? [A, r.p] : [B, 1 - r.p], live = r.lead_a || r.lead_b;
+  const rel = r.verdict.reliability;
+  $('#view').innerHTML = `<a href="#feed" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--t3)">${I.back}Все прогнозы</a>
+  <section class="card col" style="padding:32px 36px;gap:28px" id="mHead">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      ${c && c.starts ? `<span class="chip mono">${c.starts >= dayStart(0) && c.starts < dayStart(1) ? 'Сегодня' : dm(c.starts)}, ${hm(c.starts)}${TZ}</span>${relTime(c.starts) ? `<span class="chip mono" style="color:var(--lime)">${relTime(c.starts).replace(' · через', 'до начала')}</span>` : ''}` : ''}
+      ${live ? `<span class="chip live"><span class="dot" style="background:var(--red)"></span>счёт в серии ${r.lead_a}:${r.lead_b}</span>` : ''}
+      <span class="chip"><select id="mBo" aria-label="Формат">${[1, 2, 3, 5].map(b => `<option value="${b}" ${M.bo === b ? 'selected' : ''}>bo${b}</option>`).join('')}</select></span>
+      <span class="chip"><select id="mTier" aria-label="Турнир"><option value="professional" ${M.tier !== 'premium' ? 'selected' : ''}>онлайн</option><option value="premium" ${M.tier === 'premium' ? 'selected' : ''}>LAN</option></select></span>
+      ${c && c.tournament ? `<span class="chip">${esc(c.tournament)}</span>` : ''}
+      <div class="segs" style="margin-left:auto;padding:3px;border-radius:10px"><button class="seg ${!isMap ? 'on' : ''}" data-mk="series" style="height:30px;font-size:13px" ${M.bo < 2 ? 'disabled' : ''}>Серия</button><button class="seg ${isMap ? 'on' : ''}" data-mk="map" style="height:30px;font-size:13px">Карта ${r.map_no}</button></div>
+      <button class="chip ${RAILS.on ? 'lime' : ''}" id="railBtn" style="height:36px" data-tip="Фоновые видео по бокам: нарезка мыла, конфеты, пресс и Subway Surfers">Фон</button>
+      <button class="btn sec sm" id="mShare"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 3v12M7 8l5-5 5 5"/></svg>Поделиться</button>
+    </div>
+    <div class="vs" style="gap:32px">
+      <div class="t" style="gap:20px">${logo(r.team_a.logo, A, 76, 'var(--a)')}<div class="meta" style="gap:10px"><h1 class="disp name" style="font-size:30px;font-weight:700">${esc(A)}</h1>
+        <div class="fl">рейтинг пятёрки <span class="mono" style="color:var(--text);font-weight:700;margin:0 12px 0 4px">${Math.round(r.sides.a.roster_elo)}</span>${formSq(r.form_a, 5, true)}</div></div></div>
+      <div class="disp mid" style="font-size:14px;color:#5B616C;font-weight:600">VS</div>
+      <div class="t r" style="gap:20px">${logo(r.team_b.logo, B, 76, 'var(--b)')}<div class="meta" style="gap:10px"><div class="disp name" style="font-size:30px;font-weight:700">${esc(B)}</div>
+        <div class="fl">${formSq(r.form_b, 5, true, true)}<span style="margin-left:12px">рейтинг пятёрки</span> <span class="mono" style="color:var(--text);font-weight:700">${Math.round(r.sides.b.roster_elo)}</span></div></div></div>
+    </div>
+    <div class="col" style="gap:12px"><div class="big" style="align-items:flex-end"><span class="disp n ca" style="font-size:72px">${pct(pa)}</span>
+      <span class="mid" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding-bottom:8px;text-align:center"><span class="lbl">${isMap ? 'победа на карте ' + r.map_no : 'победа в серии'}${pd ? ' · ничья ' + p0(pd) : ''}</span><small style="font-size:12px;color:var(--muted)">${r.mode === 'post' ? 'после драфта' : 'до драфта'}${r.side !== 'unknown' && isMap ? ` · ${esc(short(A))} на ${r.side === 'radiant' ? 'Radiant' : 'Dire'}` : ''}</small></span>
+      <span class="disp n cb" style="font-size:72px">${pct(pb)}</span></div>${bar(pa, 12, pd)}</div>
+    ${isMap ? draftOnly(r) : ''}
+    <div class="t3cols" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px">
+      <div class="tile"><span class="lbl">Вероятный счёт</span><span class="mono v">${ts ? ts.score.replace('-', ':') + ` <small>${p0(ts.p)}</small>` : '—'}</span></div>
+      <div class="tile"><span class="lbl">${live ? 'Следующая карта' : 'Первая карта'}</span><span class="mono v">${esc(short(nxt[0]))} <small>${p0(nxt[1])}</small></span></div>
+      <div class="tile"><span class="lbl">Справедливый кэф</span><span class="mono v"><span class="ca">${fair(pa)}</span> <span style="color:#4A505A">/</span> <span class="cb">${fair(pb)}</span></span></div>
+      <div class="tile" ${r.verdict.reliability_reasons.length ? `data-tip="${esc(r.verdict.reliability_reasons.join('; '))}"` : ''}><span class="lbl">Уверенность данных</span><span style="font-size:20px;font-weight:800;display:flex;align-items:center;gap:8px"><span class="dot" style="width:10px;height:10px;background:${CONF[rel]}"></span>${rel[0].toUpperCase() + rel.slice(1)}</span></div>
+    </div>${warnHtml(r.warnings)}
+    ${r.canon_a || r.canon_b ? `<div class="muted small">${r.canon_a ? `Пятёрка ${esc(A)} сменила тег: история считается по прежнему id ${r.canon_a}. ` : ''}${r.canon_b ? `Пятёрка ${esc(B)} сменила тег: история считается по прежнему id ${r.canon_b}.` : ''}</div>` : ''}
+  </section>
+  <nav class="tabs" aria-label="Разделы разбора">${[['overview', 'Обзор'], ['rosters', 'Составы'], ['draft', 'Драфт' + (r.mode === 'post' ? '' : ' <span class="chip" style="height:22px;font-size:11px">после пиков</span>')], ['markets', 'Все рынки'], ['h2h', 'Личные встречи'], ['bet', 'Ставка' + (r.verdict.bet ? ' <span class="dot" style="background:var(--lime)"></span>' : '')]]
+    .map(([k, t]) => `<button class="tab ${M.tab === k ? 'on' : ''}" data-tab="${k}">${t}</button>`).join('')}</nav>
+  <div id="mTab"></div>`;
+  $('#mBo').onchange = e => { M.bo = +e.target.value; if (M.bo < 2) M.market = 'map'; calc(); };
+  $('#mTier').onchange = e => { M.tier = e.target.value; calc(); };
+  $$('#mHead [data-mk]').forEach(b => b.onclick = () => { M.market = b.dataset.mk; calc(); });
+  $('#railBtn').onclick = () => setRails(!RAILS.on, true);
+  $('#mShare').onclick = async () => { const ids = ['a', 'b'].map(heroIds); const url = location.origin + `/#match/${M.a.id}/${M.b.id}` + (ids[0].length && ids[1].length ? `/${M.market}/${ids[0].join(',')}/${ids[1].join(',')}/${M.side}` : '');
+    try { await navigator.clipboard.writeText(url); toast('Ссылка на разбор скопирована', 'ok'); } catch (e) { toast(url); } };
+  $$('.tabs .tab').forEach(b => b.onclick = () => { M.tab = b.dataset.tab; $$('.tabs .tab').forEach(x => x.classList.toggle('on', x === b)); renderTab(); });
+  renderTab();
+}
+function renderTab() { ({overview: tabOverview, rosters: tabRosters, draft: tabDraft, markets: tabMarkets, h2h: tabH2h, bet: tabBet})[M.tab](); }
+
+function contribList(r) { return Object.entries(r.contributions).filter(([k]) => k !== 'intercept').map(([k, v]) => ({name: FEATURE[k] || k, v})).sort((x, y) => Math.abs(y.v) - Math.abs(x.v)); }
+function scoreBars(r) {
+  if (!r.series || probs().isMap) return `<section class="card pad col" style="gap:16px"><h2 class="h2">Стороны на карте</h2>
+    <div class="g2" style="gap:12px"><div class="tile"><span class="lbl">${esc(short(r.team_a.name))} на Radiant</span><span class="mono v ca">${pct(r.p_radiant)}</span></div><div class="tile"><span class="lbl">${esc(short(r.team_a.name))} на Dire</span><span class="mono v ca">${pct(r.p_dire)}</span></div></div>
+    <p class="muted small">Если сторона неизвестна, прогноз — среднее по двум сторонам. Сторона задаётся во вкладке «Драфт».</p></section>`;
+  const sc = r.series.scores.map(x => { const [a, b] = x.score.split('-').map(Number); return {...x, a, b}; }).sort((x, y) => (y.a - y.b) - (x.a - x.b) || y.a - x.a);
+  const mx = Math.max(...sc.map(x => x.p));
+  return `<section class="card pad col" style="gap:20px"><h2 class="h2">Как может закончиться серия</h2>
+    <div class="scores">${sc.map(x => `<div data-tip="Счёт <b>${x.a}:${x.b}</b> — ${pct(x.p)}<small>справедливый кэф ${fair(x.p)}</small>"><span class="mono" style="font-size:18px;font-weight:700">${p0(x.p)}</span><i style="background:${x.a > x.b ? 'var(--a)' : (x.b > x.a ? 'var(--b)' : 'var(--dim)')};height:${Math.round(150 * x.p / mx)}px"></i></div>`).join('')}</div>
+    <div class="scl" style="margin-top:-8px">${sc.map(x => `<div><span class="mono" style="font-size:16px;font-weight:700">${x.a}:${x.b}</span><span style="font-size:12px;color:var(--muted)">${x.a === x.b ? 'ничья' : esc(short(x.a > x.b ? r.team_a.name : r.team_b.name))}</span></div>`).join('')}</div>
+    ${r.lead_a || r.lead_b ? `<p class="muted small">Итоговый счёт с учётом уже сыгранных карт: сейчас ${r.lead_a}:${r.lead_b}.</p>` : ''}</section>`;
+}
+function keyPlayers(r) {
+  const pl = r.players; if (!pl || !pl.a || !(pl.a.players || []).length) return '';
+  const all = pl.a.players.map(p => ({...p, team: 'a'})).concat(pl.b.players.map(p => ({...p, team: 'b'})));
+  const best = sd => all.filter(p => p.team === sd).sort((x, y) => y.elo - x.elo)[0];
+  const pick = [], add = p => { if (p && !pick.includes(p) && pick.length < 4) pick.push(p); };
+  const top = all.slice().sort((x, y) => y.elo - x.elo)[0];
+  add(top); all.filter(p => p.flags.some(f => f === 'спад' || f === 'слабое звено')).forEach(add); all.filter(p => p.flags.length).forEach(add); add(best('a')); add(best('b'));
+  all.slice().sort((x, y) => y.elo - x.elo).forEach(add);
+  const TAGC = {'спад': 'var(--amber)', 'слабое звено': 'var(--t2)', 'новичок': 'var(--amber)', 'на подъёме': 'var(--lime)'};
+  const card = p => { const tn = p.team === 'a' ? r.team_a.name : r.team_b.name, col = p.team === 'a' ? 'var(--a)' : 'var(--b)', tc = p.team === 'a' ? 'var(--at)' : 'var(--bt)';
+    const tag = p.flags[0] || (p === top ? 'сильнейший в матче' : (p === best(p.team) ? 'сильнейший в команде' : (p.core ? 'ядро' : 'поддержка')));
+    const line = (pl.lines || []).find(l => l.team === p.team && l.kind !== 'note' && l.text.includes(p.name));
+    const stat = `Победы на последних картах: ${p.recent_wins} из ${p.recent_n}.${p.core && p.farm != null ? ` Фарм ${p.farm > 0 ? '+' : ''}${p.farm} GPM к базе героев.` : ''}${p.kda_recent != null ? ` KDA ${p.kda_recent}.` : ''}`;
+    return `<div class="pcard"><div style="display:flex;align-items:center;gap:10px;min-width:0"><span class="dot" style="width:9px;height:9px;background:${col}"></span><span style="font-size:16px;font-weight:800">${esc(p.name)}</span>
+      <span style="font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(short(tn))} · ${p.core ? 'ядро' : 'поддержка'}</span><span class="mono" style="margin-left:auto;font-size:15px;font-weight:700" data-tip="Личный рейтинг игрока">${p.elo}</span></div>
+      <span class="chip" style="align-self:flex-start;color:${TAGC[tag] || tc}">${esc(tag)}</span><span style="font-size:13px;line-height:1.5;color:var(--t2)">${esc(line ? line.text : stat)}</span></div>`; };
+  return `<section class="card pad col" style="gap:16px"><h2 class="h2">Ключевые игроки</h2>${pl.duel ? `<p class="t2" style="font-size:14px">${esc(pl.duel)}</p>` : ''}
+    <div class="g2" style="gap:12px">${pick.map(card).join('')}</div><p class="muted small">${esc(pl.caveat || '')}</p></section>`;
+}
+function marketsSide(r) {
+  const A = r.team_a.name, B = r.team_b.name, groups = [];
+  if (r.series) { groups.push(['Победа в серии', [[A, r.series.p_a], [B, r.series.p_b]].concat(r.series.p_draw ? [['Ничья', r.series.p_draw]] : [])]);
+    groups.push(['Точный счёт', r.series.scores.map(x => { const [a, b] = x.score.split('-').map(Number); return {a, b, p: x.p}; }).sort((x, y) => (y.a - y.b) - (x.a - x.b)).map(x => [x.a + ':' + x.b, x.p])]); }
+  groups.push([r.lead_a || r.lead_b ? 'Карта ' + r.map_no : 'Первая карта', [[A, r.p], [B, 1 - r.p]]]);
+  if (r.draft_only) groups.push(['Чисто пик, без команд и игроков', [[A, r.draft_only.p, 'Модель только по героям'], [B, 1 - r.draft_only.p, 'Модель только по героям']]]);
+  const ms = r.markets || [], tot = ms.filter(m => ['maps', 'kills', 'dur'].includes(m.key)), hc = ms.filter(m => m.key.startsWith('hcp'));
+  const nm = m => ({maps: 'Карт ', kills: 'Киллов на карте ', dur: 'Карта дольше, мин: '}[m.key] || '') + m.yes;
+  if (tot.length) groups.push(['Тоталы', tot.map(m => [nm(m), m.p_yes, m.note])]);
+  if (hc.length) groups.push(['Форы по картам', hc.map(m => [m.yes, m.p_yes, m.note])]);
+  return `<section class="card pad-s col" style="gap:4px"><h2 class="h3" style="margin-bottom:8px">Вероятности по рынкам</h2>
+    <div class="mrow" style="border-top:0;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 0"><span>Исход</span><span style="text-align:right">Шанс</span><span style="text-align:right">Кэф</span></div>
+    ${groups.map(([g, rows]) => `<div class="lbl" style="padding:14px 0 4px;color:var(--dim)">${g}</div>` + rows.map(([n, p, note]) => `<div class="mrow" ${note ? `data-tip="${esc(note)}"` : ''}><span style="color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n)}</span><span class="mono" style="text-align:right;font-weight:700">${pct(p, p < 0.1 || p > 0.9 ? 1 : 0)}</span><span class="mono" style="text-align:right;color:var(--t3)">${fair(p)}</span></div>`).join('')).join('')}
+    <p style="margin:12px 0 0;font-size:12px;line-height:1.5;color:var(--muted)">Кэф — справедливый, 1 / вероятность. Это оценка модели, а не линия букмекера. Линии тоталов меняются во вкладке «Все рынки».</p></section>`;
+}
+function claudeCard(r) {
+  const an = r.analysis, v = an && an.verdict, A = r.team_a.name;
+  let head, body;
+  if (an) { const pA = v ? (an.swapped ? 1 - v.p_a : v.p_a) : null;
+    head = v ? `Claude: ${esc(v.team)}${pA != null ? `, ${esc(short(A))} на карте — ${pct(pA)}` : ''}` : esc(r.verdict.text);
+    body = `${v ? `<div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip"><span class="dot" style="background:${CONF[v.confidence] || '#6B717C'}"></span>уверенность: ${esc(v.confidence)}</span><span class="chip" style="white-space:normal;height:auto;min-height:26px;padding:4px 10px">ставка: ${esc(v.bet)}</span></div>` : ''}
+      <div class="md ${M.open ? '' : 'clip'}" id="anBody">${md(an.text.replace(/\n?Вердикт:.*$/s, ''))}</div><a href="#" id="anMore" style="font-size:14px;font-weight:700">${M.open ? 'Свернуть' : 'Показать разбор полностью'}</a>`; }
+  else { head = esc(r.verdict.text) + '.';
+    const ls = ((r.players || {}).lines || []).filter(l => l.kind !== 'note').slice(0, 4);
+    body = `<ul class="bul">${ls.map(lineHtml).join('')}</ul><p class="muted" style="font-size:13px">Это вывод модели по базе. Разбор Claude читает досье, дозапрашивает факты и ищет новости о заменах и болезнях — занимает 1–3 минуты.</p>`; }
+  return `<section class="card pad col" style="gap:16px"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><span class="lbl">Разбор</span><span class="chip">${an ? `Claude · ${dm(an.ts)} в ${hm(an.ts)}` : 'модель · ' + (r.mode === 'post' ? 'после драфта' : 'до драфта')}</span></div>
+    <h2 class="disp" style="font-size:22px;font-weight:600;line-height:1.35">${head}</h2>${body}
+    <div id="verdictBox"></div><pre class="stream" id="anStream" hidden></pre><div class="log" id="anLog"></div>
+    <div class="frow" style="align-items:center"><button class="btn ${an ? 'sec' : 'pri'} sm" id="anRun" ${STATUS && !STATUS.claude ? 'disabled data-tip="Claude Code CLI не найден"' : ''}>${an ? 'Обновить разбор Claude' : 'Запросить разбор Claude'}</button><button class="btn sec sm" id="anStop" hidden>Стоп</button>
+      <details style="flex:1;min-width:220px"><summary>Настройки разбора</summary><div class="frow" style="margin-top:10px"><label class="f" style="width:110px">Модель<select class="in" id="anModel"><option>opus</option><option>fable</option><option>sonnet</option></select></label>
+        <label class="f" style="width:110px">Усилие<select class="in" id="anEffort"><option>low</option><option>medium</option><option selected>high</option><option>xhigh</option><option>max</option></select></label>
+        <label class="ck" style="height:40px"><input type="checkbox" id="anRec" checked>вердикт в журнал</label></div></details></div></section>`;
+}
+function tabOverview() {
+  const r = M.r, A = r.team_a.name, B = r.team_b.name, fs = contribList(r), top = fs.slice(0, 8), rest = fs.slice(8).filter(f => Math.abs(f.v) >= 0.005);
+  const m = STATUS && STATUS.model, cnt = l => l.filter(Boolean).length;
+  const draftBox = r.mode === 'post'
+    ? `<section class="card pad-s col" style="gap:14px"><div style="display:flex;align-items:center;gap:10px">${I.yes}<h2 class="h3">Драфт учтён</h2></div>${((r.draft || {}).summary || []).slice(0, 3).map(x => `<p style="font-size:14px;line-height:1.55;color:var(--t2)"><b style="color:var(--text)">${esc(x.label)}.</b> ${esc(x.text)}</p>`).join('')}<a href="#" data-go="draft" style="font-size:14px;font-weight:700">Разбор драфта →</a></section>`
+    : `<section class="card pad-s col" style="gap:14px;border-style:dashed;border-color:#34393F"><div style="display:flex;align-items:center;gap:10px">${I.clock}<h2 class="h3">Ждём драфт</h2></div>
+      <p style="font-size:14px;line-height:1.55;color:var(--t2)">Когда команды выберут героев, внесите пики во вкладке «Драфт» или откройте карту из Live — модель пересчитает прогноз с учётом героев.${m && m.acc_pre ? ` После драфта она точнее: ${pct(m.acc_post)} против ${pct(m.acc_pre)}.` : ''}</p><a href="#" data-go="draft" style="font-size:14px;font-weight:700">Внести драфт →</a></section>`;
+  const formRow = (n, f) => `<div class="col" style="gap:6px"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:700">${esc(n)}</span><span class="mono" style="color:var(--t3)">${cnt(f)}–${f.length - cnt(f)}</span></div><div style="display:flex;gap:4px;flex-wrap:wrap">${formSq(f, 10, true)}</div></div>`;
+  $('#mTab').innerHTML = `<div class="two wide"><div class="col" style="gap:24px">${claudeCard(r)}
+    <section class="card pad col" style="gap:20px"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><h2 class="h2">Что повлияло на прогноз</h2>${legend(A, B)}</div>
+      <div class="col" style="gap:6px">${factors(top, A, B)}</div>${rest.length ? `<details><summary>Остальные признаки</summary><div class="col" style="gap:6px;margin-top:12px">${factors(rest, A, B)}</div></details>` : ''}
+      <p style="font-size:13px;line-height:1.5;color:var(--muted)">Длина полосы — насколько признак сдвинул прогноз, в логитах: +0.20 это примерно +5 п.п. возле 50%.${m ? ` Признаков у модели ${m.features_pre} до драфта и ${m.features_post} после.` : ''} Преимущество стороны Radiant: ${r.contributions.intercept >= 0 ? '+' : '−'}${Math.abs(r.contributions.intercept).toFixed(2)}.</p></section>
+    ${scoreBars(r)}${keyPlayers(r)}</div>
+    <aside class="col" style="gap:20px">${marketsSide(r)}${draftBox}
+      <section class="card pad-s col" style="gap:14px"><h2 class="h3">Форма, последние 10 карт</h2>${formRow(A, r.form_a)}${formRow(B, r.form_b)}<span style="font-size:12px;color:var(--muted)">Слева — самая свежая карта</span></section>
+      <section class="card pad-s col" style="gap:14px"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h2 class="h3">Уверенность данных</h2><span class="chip" style="color:${CONF[r.verdict.reliability]}"><span class="dot" style="background:${CONF[r.verdict.reliability]}"></span>${esc(r.verdict.reliability)}</span></div>
+        <ul class="chk">${r.checks.map(c => `<li>${c.ok ? I.yes : I.no}${esc(c.text)}</li>`).join('')}</ul></section></aside></div>`;
+  $$('#mTab [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); $(`.tabs [data-tab="${a.dataset.go}"]`).click(); window.scrollTo(0, $('.tabs').offsetTop - 80); });
+  const more = $('#anMore'); if (more) more.onclick = e => { e.preventDefault(); M.open = !M.open; $('#anBody').classList.toggle('clip', !M.open); more.textContent = M.open ? 'Свернуть' : 'Показать разбор полностью'; };
+  $('#anRun').onclick = runClaude; $('#anStop').onclick = stopClaude;
+}
+function runClaude() {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(payload())) { if (v == null || k === 'markets') continue; q.set(k, Array.isArray(v) ? (Array.isArray(v[0]) ? JSON.stringify(v) : v.join(',')) : v); }
+  ['assign_a', 'assign_b'].forEach(k => q.delete(k));
+  q.set('model', $('#anModel').value); q.set('effort', $('#anEffort').value); q.set('record', $('#anRec').checked ? '1' : '0');
+  const pre = $('#anStream'); pre.hidden = false; pre.textContent = ''; $('#anLog').textContent = ''; $('#verdictBox').innerHTML = ''; lastVerdict = null;
+  $('#anRun').disabled = true; $('#anStop').hidden = false;
+  es = new EventSource('/api/analyze?' + q.toString());
+  const log = m => { const l = $('#anLog'); if (l) { l.textContent += m + '\n'; l.scrollTop = 1e9; } };
+  const finish = () => { if (es) { es.close(); es = null; } const b = $('#anRun'); if (b) { b.disabled = false; $('#anStop').hidden = true; } };
+  es.addEventListener('text', e => { pre.textContent += JSON.parse(e.data); pre.scrollTop = 1e9; });
+  es.addEventListener('tool', e => log('▸ ' + JSON.parse(e.data)));
+  es.addEventListener('tool_result', e => log('  ' + JSON.parse(e.data)));
+  es.addEventListener('log', e => log(JSON.parse(e.data)));
+  es.addEventListener('done', e => { const d = JSON.parse(JSON.parse(e.data)); log(`готово: ${d.num_turns} ходов, ${d.duration_s} с${d.is_error ? ', ошибка' : ''}`); });
+  es.addEventListener('verdict', e => { const d = JSON.parse(e.data); finish();
+    if (d && d.verdict) { lastVerdict = d.verdict; toast('Разбор готов' + (d.prediction_id ? ', запись в журнале № ' + d.prediction_id : ''), 'ok'); M.open = true; calc(); }
+    else if ($('#verdictBox')) $('#verdictBox').innerHTML = `<div class="warn">${I.warn}<span>Блок «Вердикт» в ответе не найден. Текст разбора — ниже.</span></div>`; });
+  es.onerror = finish;
+}
+async function stopClaude() { try { await api('/api/stop', {}); } catch (e) {} if (es) { es.close(); es = null; } $('#anRun').disabled = false; $('#anStop').hidden = true; }
+
+function tabRosters() {
+  const r = M.r, pl = r.players || {};
+  const sg = (v, u) => v == null ? '<span class="muted">—</span>' : (v > 0 ? '+' : '') + v + (u || '');
+  const FL = {'спад': 'bad', 'слабое звено': 'bad', 'новичок': 'warn', 'на подъёме': 'ok'};
+  const team = (sd, name, color) => { const t = M[sd], info = t.info, byId = {}; info.roster.concat(info.candidates).forEach(p => byId[p.id] = p);
+    const side = pl[sd] || {players: []}, gone = t.roster.filter(id => byId[id] && byId[id].departed).length;
+    return `<section class="card pad col" style="gap:16px"><div style="display:flex;align-items:center;gap:14px">${logo(info.logo, name, 44, color)}<div style="min-width:0;flex:1"><div class="h2" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div><div class="muted small">последний матч ${dmy(info.last_ts)}${side.mean_elo ? ' · средний рейтинг ' + side.mean_elo : ''}</div></div></div>
+      ${gone ? `<div class="warn">${I.warn}<span>${gone} из пятёрки с тех пор играли за другие команды. Состав устарел — замените игроков ниже.</span></div>` : ''}
+      <div class="scroll"><table><tr><th>Игрок</th><th>Роль</th><th class="num">Рейтинг</th><th class="num" data-tip="Фарм относительно среднего по героям, на которых он играет">Фарм</th><th class="num" data-tip="Победы на последних картах">Карты</th><th class="num" data-tip="Последние 8 карт против обычного уровня: фарм у ядер, KDA у поддержки">Форма</th><th class="num" data-tip="Карт с этой командой за 120 дней">Стаж</th></tr>
+      ${side.players.map(p => `<tr><td><b>${esc(p.name)}</b> ${p.flags.map(f => `<span class="tag ${FL[f] || ''}">${esc(f)}</span>`).join(' ')}${byId[p.id] && byId[p.id].departed ? ` <span class="tag bad" data-tip="${esc(byId[p.id].departed)}">ушёл</span>` : ''}${p.note ? `<div class="muted small">${esc(p.note.split('\n')[0])}</div>` : ''}</td><td class="muted">${p.core ? 'ядро' : 'поддержка'}</td><td class="num"><b>${p.elo}</b></td><td class="num">${p.core ? sg(p.farm) : '<span class="muted">—</span>'}</td><td class="num">${p.recent_wins} из ${p.recent_n}</td><td class="num">${p.core ? sg(p.farm_dip) : sg(p.kda_dip, ' KDA')}</td><td class="num">${p.tenure}</td></tr>`).join('')}</table></div>
+      <details><summary>Заменить игрока</summary><div class="col" style="gap:8px;margin-top:12px">${t.roster.map((id, i) => `<div style="display:flex;gap:8px;align-items:center"><span style="width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700">${esc((byId[id] || {name: id}).name)}</span><span class="muted">→</span>
+        <select class="in" data-sd="${sd}" data-i="${i}" style="flex:1"><option value="${id}">оставить</option>${info.candidates.filter(c => !t.roster.includes(c.id)).map(c => `<option value="${c.id}">${esc(c.name)} · ${c.games} карт</option>`).join('')}</select>
+        <input type="number" placeholder="account_id" data-sd="${sd}" data-i="${i}" style="width:130px"></div>`).join('')}</div></details></section>`; };
+  const a = r.sides.a, b = r.sides.b, f2 = v => (v >= 0 ? '+' : '') + v.toFixed(2);
+  const rows = [['Рейтинг пятёрки', a.roster_elo.toFixed(0), b.roster_elo.toFixed(0)], ['Рейтинг команды', a.elo.toFixed(0), b.elo.toFixed(0)], ['Форма', pct(a.form, 0), pct(b.form, 0)],
+    ['Сыгранность, карт', a.stability.toFixed(0), b.stability.toFixed(0)], ['Отдых, дней', Math.expm1(a.rest).toFixed(0), Math.expm1(b.rest).toFixed(0)], ['Карт за неделю', a.load7, b.load7],
+    ['Фарм к базе героев, GPM', (a.farm >= 0 ? '+' : '') + (100 * a.farm).toFixed(0), (b.farm >= 0 ? '+' : '') + (100 * b.farm).toFixed(0)], ['Сливы лида', pct(a.throw, 0), pct(b.throw, 0)], ['Камбэки', pct(a.comeback, 0), pct(b.comeback, 0)]];
+  if (r.sides.draft_a) { const x = r.sides.draft_a, y = r.sides.draft_b; rows.push(['Мета героев', f2(x.meta), f2(y.meta)], ['Синергии', f2(x.synergy), f2(y.synergy)], ['Комфорт игроков', f2(x.player_hero), f2(y.player_hero)]); }
+  $('#mTab').innerHTML = `<div class="col" style="gap:24px"><div class="g2" style="gap:24px;align-items:start">${team('a', r.team_a.name, 'var(--a)')}${team('b', r.team_b.name, 'var(--b)')}</div>
+    <section class="card pad col" style="gap:8px"><h2 class="h2" style="margin-bottom:8px">Показатели команд</h2>${rows.map(x => `<div style="display:grid;grid-template-columns:1fr minmax(120px,auto) 1fr;gap:16px;padding:9px 0;border-top:1px solid var(--hair);align-items:center"><span class="mono ca" style="text-align:right;font-weight:700">${x[1]}</span><span class="t3" style="text-align:center;font-size:13px">${x[0]}</span><span class="mono cb" style="font-weight:700">${x[2]}</span></div>`).join('')}</section>
+    <p class="muted small">${esc(pl.caveat || '')}</p></div>`;
+  $$('#mTab select[data-sd]').forEach(sel => sel.onchange = () => { M[sel.dataset.sd].roster[+sel.dataset.i] = +sel.value; calc(); });
+  $$('#mTab input[data-sd]').forEach(inp => inp.onchange = () => { if (inp.value) { M[inp.dataset.sd].roster[+inp.dataset.i] = +inp.value; calc(); } });
+}
+
+const STAGE_TAG = {'лейт': 'ok', 'темп': 'warn'};
+function stagesCard(s, A, B) {
+  if (!s) return '';
+  const lead = r => Math.abs(r.diff) < 0.03 ? '<span class="muted">равны</span>' : `<span style="color:${r.diff > 0 ? 'var(--at)' : 'var(--bt)'};font-weight:700">${esc(short(r.diff > 0 ? A : B))}</span>`;
+  const mxp = Math.max(0.01, ...s.rows.map(r => r.p || 0));
+  const likely = s.rows.reduce((m, r) => (r.p || 0) > (m.p || 0) ? r : m, s.rows[0]);
+  const heroRow = h => `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--hair);font-size:13px"><span style="flex:1;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(h.hero_name)}</span>
+    <span class="tag ${STAGE_TAG[h.tag] || ''}">${esc(h.tag)}</span><span class="mono t3" data-tip="Винрейт героя до 30-й минуты и после 40-й, ${h.games} карт за 240 дней; карты с ним ${h.dur_delta >= 0 ? 'длиннее' : 'короче'} средней на ${Math.abs(h.dur_delta)} мин">${pct(h.early, 0)} → ${pct(h.late, 0)}</span></div>`;
+  return `<section class="card pad col" style="gap:16px"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><h2 class="h3">Стадии игры</h2>
+      <span style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip"><span class="dot" style="background:var(--a)"></span>${esc(short(A))} — ${esc(s.a.label)}</span><span class="chip"><span class="dot" style="background:var(--b)"></span>${esc(short(B))} — ${esc(s.b.label)}</span>${s.expected_min ? `<span class="chip lime" data-tip="Ожидаемая длительность карты по модели тоталов">≈ ${Math.round(s.expected_min)} мин</span>` : ''}</span></div>
+    <div class="scroll"><table><tr><th>Отрезок</th><th data-tip="Вероятность, что карта закончится в этом отрезке, по модели длительности">Закончится здесь</th><th class="num">${esc(short(A))}</th><th></th><th class="num">${esc(short(B))}</th><th>Перевес по героям</th></tr>
+      ${s.rows.map(r => `<tr style="${r === likely ? 'background:rgba(198,242,78,.05)' : ''}"><td style="white-space:nowrap">${esc(r.stage)}${r === likely ? ' <span class="tag ok">вероятнее всего</span>' : ''}</td>
+        <td style="min-width:140px">${r.p != null ? `<div style="display:flex;align-items:center;gap:8px"><span class="track" style="flex:1"><span class="fill" style="width:${100 * r.p / mxp}%;background:var(--lime)"></span></span><span class="mono" style="width:38px;text-align:right">${p0(r.p)}</span></div>` : '<span class="muted">—</span>'}</td>
+        <td class="num ca" style="font-weight:700">${pct(r.a, 0)}</td><td style="min-width:110px">${bar(r.a / (r.a + r.b))}</td><td class="num cb" style="font-weight:700">${pct(r.b, 0)}</td><td>${lead(r)}</td></tr>`).join('')}</table></div>
+    <p style="font-size:14px;line-height:1.6;color:var(--t2)">${esc(s.text)}</p>
+    <div class="g2" style="gap:24px"><div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding-bottom:4px"><span class="lbl" style="color:var(--at)">${esc(short(A))}</span><span>до 30 → после 40 мин</span></div>${s.a.heroes.map(heroRow).join('')}</div>
+      <div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding-bottom:4px"><span class="lbl" style="color:var(--bt)">${esc(short(B))}</span><span>до 30 → после 40 мин</span></div>${s.b.heroes.map(heroRow).join('')}</div></div>
+    ${s.flips.length ? `<div class="col" style="gap:8px"><span class="lbl">Матчапы, которые меняют знак по стадиям</span>${s.flips.map(f => `<div style="display:flex;gap:12px;align-items:center;font-size:13px;flex-wrap:wrap"><span style="font-weight:700">${esc(f.a)} <span class="muted">против</span> ${esc(f.b)}</span><span class="chip">до 35 мин <b class="mono" style="color:${f.short >= 0.5 ? 'var(--at)' : 'var(--bt)'}">${pct(f.short, 0)}</b> · ${f.games_short} карт</span><span class="chip">после <b class="mono" style="color:${f.long >= 0.5 ? 'var(--at)' : 'var(--bt)'}">${pct(f.long, 0)}</b> · ${f.games_long} карт</span></div>`).join('')}</div>` : ''}
+    <p class="muted small">Винрейты героев по отрезкам — про-матчи за 240 дней с усадкой к 50%. «Перевес по героям» — сумма по пятёркам без учёта команд и игроков; ожидаемая длительность — модель тоталов для этих команд и героев. В общий прогноз стадии входят только усреднённо.</p></section>`;
+}
+const DLAB = {'сигнатурный': 'ok', 'комфортный': 'ok', 'редкий пик': 'warn', 'впервые в про': 'warn', 'кот в мешке': 'warn', 'неудачный': 'bad', 'слабый': 'bad'};
+function draftAnalysis(d, A, B) {
+  if (!d || d.error) return d && d.error ? `<div class="warn">${I.warn}<span>${esc(d.error)}</span></div>` : '';
+  if (!(d.picks_a || []).length) return '';
+  const pick = p => `<div class="dpick">${heroPic(p.hero)}<div style="min-width:0;flex:1"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${esc(p.hero_name)}</b><span class="muted">${esc(p.player)}</span><span class="tag ${DLAB[p.label] || ''}">${esc(p.label)}</span>${p.stage && p.stage !== 'ровный' && p.stage !== 'мало данных' ? `<span class="tag ${p.stage === 'лейт' ? 'ok' : 'warn'}" data-tip="Винрейт героя до 30-й минуты ${pct(p.stage_early, 0)}, после 40-й — ${pct(p.stage_late, 0)}">${esc(p.stage)}</span>` : ''}${p.last5 ? `<span style="display:inline-flex;gap:3px" data-tip="Последние карты на герое, свежие слева">${formSq(p.last5.split('').map(c => c === 'W'), 5)}</span>` : ''}</div>
+    <div style="font-size:13px;color:var(--t2);margin-top:4px">${esc(p.facts)}</div><div class="muted small" style="margin-top:2px">мета героя ${p0(p.meta_wr)} · команда на нём ${p.team_games >= 1 ? p0(p.team_wr) + ', ' + Math.round(p.team_games) + ' карт' : 'не играла'}${p.pubs && p.pubs.games ? ' · с пабами ' + p.pubs.games + ' игр, ' + p0(p.pubs.wins / p.pubs.games) : ''}</div></div></div>`;
+  const colm = (name, side, comfort, c) => `<div><div style="display:flex;align-items:center;gap:10px;padding-bottom:10px"><span class="dot" style="width:9px;height:9px;background:${c}"></span><b style="font-size:15px">${esc(name)}</b><span class="tag" data-tip="Сумма по пикам: сигнатурный +2, комфортный +1, редкий −0.5, кот в мешке и неудачный −1, слабый −2">комфорт ${comfort > 0 ? '+' : ''}${comfort}</span></div>${side.map(pick).join('')}</div>`;
+  const hs = xs => xs.length ? `<span style="display:inline-flex;gap:4px">${xs.map(x => heroPic(x.hero, 's')).join('')}</span>` : '<span class="muted small">нет данных</span>';
+  const mxl = Math.max(100, ...(d.lanes || []).map(l => Math.abs(l.adv || 0)));
+  const lane = l => `<tr data-tip="${l.adv == null ? 'нет данных' : 'Перевес ' + esc(l.adv >= 0 ? A : B) + ': около ' + Math.abs(l.adv) + ' золота и опыта на героя к 10-й минуте'}"><td class="muted" style="white-space:nowrap">${esc(l.title)}</td><td>${hs(l.a)}</td><td style="width:36%"><div class="fac" style="grid-template-columns:1fr 1fr"><span class="lh"><i style="width:${l.adv > 0 ? 100 * l.adv / mxl : 0}%"></i></span><span class="rh"><i style="width:${l.adv < 0 ? -100 * l.adv / mxl : 0}%"></i></span></div></td><td class="num"><b>${l.adv == null ? '—' : (l.adv > 0 ? '+' : '') + l.adv}</b></td><td style="text-align:right">${hs(l.b)}</td></tr>`;
+  const pr = d.pairs || {}, cs = pr.counters || [];
+  const pairTbl = (title, rows, sep) => rows && rows.length ? `<div><div class="lbl" style="padding-bottom:6px">${title}</div><table><tr><th>Пара</th><th class="num">Карт</th><th class="num">Побед</th><th class="num" data-tip="Сверх силы самих героев, в логитах">Эффект</th></tr>${rows.map(x => `<tr><td>${esc(x.a)} ${sep} ${esc(x.b)}</td><td class="num">${x.games}</td><td class="num">${x.wr == null ? '—' : p0(x.wr)}</td><td class="num ${x.score >= 0 ? 'pos' : 'neg'}">${x.score > 0 ? '+' : ''}${x.score.toFixed(2)}</td></tr>`).join('')}</table></div>` : '';
+  const KD = {good: 'ok', bad: 'bad', warn: 'warn'};
+  return `<section class="card pad col" style="gap:14px"><h2 class="h2">Что говорит драфт</h2>${(d.summary || []).map(x => `<div style="display:flex;gap:12px;align-items:flex-start"><span class="tag ${KD[x.kind] || ''}" style="flex-shrink:0;margin-top:1px">${esc(x.label)}</span><span style="font-size:14px;color:var(--t2)">${esc(x.text)}</span></div>`).join('')}</section>
+    <section class="card pad"><div class="g2" style="gap:32px">${colm(A, d.picks_a, d.comfort_a, 'var(--a)')}${colm(B, d.picks_b, d.comfort_b, 'var(--b)')}</div></section>
+    <div class="col" style="gap:24px"><section class="card pad col" style="gap:12px"><h2 class="h3">Линии: перевес к 10-й минуте</h2><div class="scroll"><table>${(d.lanes || []).map(lane).join('')}</table></div></section>
+      ${stagesCard(d.stages, A, B)}</div>
+    <details class="card" style="padding:20px 28px"><summary>Пары героев: синергии и контры</summary><div class="g3" style="margin-top:16px">${pairTbl('Синергии ' + esc(A), (pr.synergy_a || []).slice(0, 3).concat((pr.synergy_a || []).slice(-2)), '+')}${pairTbl('Синергии ' + esc(B), (pr.synergy_b || []).slice(0, 3).concat((pr.synergy_b || []).slice(-2)), '+')}${pairTbl(esc(A) + ' против ' + esc(B), cs.slice(0, 4).concat(cs.slice(-4)), 'против')}</div></details>
+    <p class="muted small">${esc(d.note || '')}</p>`;
+}
+function tabDraft() {
+  const r = M.r, A = r.team_a.name, B = r.team_b.name;
+  const names = sd => { const t = M[sd], byId = {}; t.info.roster.concat(t.info.candidates).forEach(p => byId[p.id] = p); return t.roster.map(id => [id, (byId[id] || {name: M.r['lineup_' + sd].find(p => p.id === id)?.name || id}).name]); };
+  const inputs = (sd, name, c) => `<div class="col" style="gap:8px"><div style="display:flex;align-items:center;gap:10px"><span class="dot" style="width:9px;height:9px;background:${c}"></span><b>${esc(name)}</b></div>
+    ${[0, 1, 2, 3, 4].map(i => `<div style="display:flex;gap:8px;align-items:center">${heroPic(heroByName[String(M.heroes[sd][i]).trim().toLowerCase()])}<input type="text" list="heroList" placeholder="Герой ${i + 1}" value="${esc(M.heroes[sd][i])}" data-h="${sd}" data-i="${i}" style="flex:1.3;min-width:0">
+      <select class="in" data-w="${sd}" data-i="${i}" style="flex:1;min-width:0"><option value="">игрок: авто</option>${names(sd).map(([id, n]) => `<option value="${id}" ${String(M.who[sd][i]) === String(id) ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></div>`).join('')}</div>`;
+  $('#mTab').innerHTML = `<div class="col" style="gap:24px"><section class="card pad col" style="gap:20px"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2 class="h2">Драфт карты ${r.map_no}</h2><span class="chip">${r.mode === 'post' ? 'прогноз с учётом героев' : 'нужны все десять героев'}</span></div>
+      <div class="frow"><label class="f" style="width:170px">Сторона ${esc(short(A))}<select class="in" id="dSide"><option value="unknown">неизвестна</option><option value="radiant">Radiant</option><option value="dire">Dire</option></select></label>
+        <label class="f">Счёт в серии<span style="display:flex;gap:6px;align-items:center"><input type="number" id="dLa" min="0" value="${M.leadA}" style="width:64px"><span class="muted">:</span><input type="number" id="dLb" min="0" value="${M.leadB}" style="width:64px"></span></label></div>
+      <div class="g2" style="gap:24px">${inputs('a', A, 'var(--a)')}${inputs('b', B, 'var(--b)')}</div>
+      <div class="frow" style="align-items:center"><button class="btn pri" id="dCalc">Пересчитать с драфтом</button><button class="btn sec" id="dClear">Очистить</button><span class="muted small">Игрока на герое модель определяет сама по истории; «авто» можно заменить вручную.</span></div></section>
+    ${draftOnly(r, true)}${r.mode === 'post' ? draftAnalysis(r.draft, A, B) : `<div class="empty">Разбор драфта появится после того, как будут внесены все десять героев: личная статистика игроков на героях, линии, сила по времени, пары.</div>`}</div>`;
+  $('#dSide').value = M.side;
+  $('#dSide').onchange = e => M.side = e.target.value;
+  $('#dLa').onchange = e => M.leadA = +e.target.value || 0; $('#dLb').onchange = e => M.leadB = +e.target.value || 0;
+  $$('#mTab [data-h]').forEach(inp => inp.oninput = () => { M.heroes[inp.dataset.h][+inp.dataset.i] = inp.value; const id = heroByName[inp.value.trim().toLowerCase()]; if (id) inp.previousElementSibling.outerHTML = heroPic(id); });
+  $$('#mTab [data-w]').forEach(sel => sel.onchange = () => M.who[sel.dataset.w][+sel.dataset.i] = sel.value);
+  $('#dCalc').onclick = () => { if (heroIds('a').length === 5 && heroIds('b').length === 5 && M.market === 'series' && M.bo > 1) M.market = 'map'; calc(); };
+  $('#dClear').onclick = () => { for (const sd of ['a', 'b']) { M.heroes[sd] = ['', '', '', '', '']; M.who[sd] = ['', '', '', '', '']; } calc(); };
+}
+
+function tabMarkets() {
+  const r = M.r, ms = r.markets || [];
+  const row = m => { const v = m.verdict;
+    return `<tr><td style="min-width:200px"><b>${esc(m.title)}</b><div class="muted small">${esc(m.note || '')}</div></td>
+      <td><input type="number" step="0.5" value="${m.line}" data-k="${m.key}" data-f="line" style="width:84px"></td>
+      <td class="num" style="white-space:nowrap"><b>${pct(m.p_yes)}</b> <span class="muted">· ${fair(m.p_yes)}</span><div class="muted small" style="font-family:Manrope,sans-serif">${esc(m.yes)}</div></td>
+      <td class="num" style="white-space:nowrap"><b>${pct(1 - m.p_yes)}</b> <span class="muted">· ${fair(1 - m.p_yes)}</span><div class="muted small" style="font-family:Manrope,sans-serif">${esc(m.no)}</div></td>
+      <td style="white-space:nowrap"><input type="number" step="0.01" placeholder="да" value="${m.odds_yes || ''}" data-k="${m.key}" data-f="odds_yes" style="width:78px"> <input type="number" step="0.01" placeholder="нет" value="${m.odds_no || ''}" data-k="${m.key}" data-f="odds_no" style="width:78px"></td>
+      <td style="min-width:280px">${recFull(v)}</td><td><button class="btn sec sm" data-rec="${m.key}">В журнал</button></td></tr>`; };
+  $('#mTab').innerHTML = `<div class="col" style="gap:24px"><div class="two wide" style="grid-template-columns:400px minmax(0,1fr)">${marketsSide(r)}
+    <section class="card pad col" style="gap:16px"><h2 class="h2">По ходу карты</h2><p class="t3" style="font-size:14px">Вероятность ${esc(r.team_a.name)} с учётом минуты и перевеса по золоту. Предматчевая оценка карты — ${pct(r.p)}.</p>
+      <div class="frow"><label class="f" style="width:100px">Минута<input type="number" id="igMinute" value="${M.ig ? M.ig.minute : 20}" min="0" max="90"></label><label class="f" style="width:190px">Перевес ${esc(short(r.team_a.name))} по золоту<input type="number" id="igLead" step="500" placeholder="например −4000" value="${M.ig && M.ig.lead != null ? M.ig.lead : ''}"></label>
+        <label class="f" style="width:150px">Live-кэф на ${esc(short(r.team_a.name))}<input type="number" id="igOdds" step="0.01" placeholder="необязательно"></label><button class="btn pri" id="igBtn">Посчитать</button></div><div id="igOut" class="col" style="gap:14px"></div></section></div>
+    ${ms.length ? `<section class="card pad col" style="gap:14px"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2 class="h2">Тоталы и форы: линия и кэфы BetBoom</h2><button class="btn pri sm" id="mkCalc">Пересчитать</button></div>
+      <p class="t3" style="font-size:14px">Тоталы относятся к карте ${r.map_no}. Кэф «да» — на «больше» или на прошедшую фору, «нет» — на обратный исход. Вероятности тоталов надёжны в диапазоне 25–75%.</p>
+      <div class="scroll"><table><tr><th>Рынок</th><th>Линия</th><th class="num">Да · кэф</th><th class="num">Нет · кэф</th><th>BetBoom</th><th>Рекомендация</th><th></th></tr>${ms.map(row).join('')}</table></div></section>` : ''}</div>`;
+  const read = () => { const spec = {}; $$('#mTab [data-k]').forEach(i => { if (i.value) (spec[i.dataset.k] = spec[i.dataset.k] || {})[i.dataset.f] = +i.value; }); M.spec = spec; };
+  if ($('#mkCalc')) $('#mkCalc').onclick = () => { read(); calc(); };
+  $$('#mTab [data-rec]').forEach(b => b.onclick = async () => { try { read(); const body = payload(); body.market_key = b.dataset.rec; const x = await api('/api/bets', body); toast('Записано в журнал, № ' + x.id + ': ' + x.market + policyText(x.policy), 'ok'); } catch (e) { fail(e); } });
+  $('#igBtn').onclick = ingameCalc;
+  if (M.ig && M.ig.lead != null) ingameCalc();
+}
+async function ingameCalc() {
+  try { const r0 = M.r, minute = +$('#igMinute').value, lead = $('#igLead').value, odds = +$('#igOdds').value, A = r0.team_a.name;
+    M.ig = {minute, lead: lead === '' ? null : +lead};
+    const r = await api('/api/ingame', {p: r0.p, minute, lead: lead === '' ? null : +lead});
+    let h = '';
+    if (r.p != null) h += `<div class="col" style="gap:8px"><div class="big"><span class="disp n ca" style="font-size:36px">${pct(r.p)}</span><span class="lbl mid">${esc(short(A))} · минута ${minute}</span><span class="disp n cb" style="font-size:36px">${pct(1 - r.p)}</span></div>${bar(r.p, 8)}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip">до карты ${pct(r0.p)}</span><span class="chip">справедливый кэф ${fair(r.p)} / ${fair(1 - r.p)}</span>${odds > 1 ? `<span class="chip ${r.p * odds - 1 > 0 ? 'lime' : ''}">ожидание по ${odds}: ${(100 * (r.p * odds - 1)).toFixed(1)}%</span>` : ''}</div>`;
+    h += `<div class="lbl">На ${minute}-й минуте при разном перевесе</div><div class="tiles" style="grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px">${r.table.map(t => `<div class="tile" style="padding:10px 12px;gap:2px"><span class="s mono">${t.lead > 0 ? '+' : ''}${t.lead / 1000}к</span><span class="mono" style="font-size:16px;font-weight:700">${p0(t.p)}</span></div>`).join('')}</div>`;
+    if (r.check) h += `<p class="muted small">Проверка на ${num(r.check.n)} свежих картах: log loss ${r.check.model.logloss.toFixed(3)} с учётом золота против ${r.check.pregame_only.logloss.toFixed(3)} без него. Live-линия букмекера учитывает то же самое — запас ищите только при заметном расхождении.</p>`;
+    $('#igOut').innerHTML = h;
+  } catch (e) { fail(e); }
+}
+function tabH2h() {
+  const r = M.r, h = r.h2h_rows, A = r.team_a.name, B = r.team_b.name;
+  if (!h.maps) { $('#mTab').innerHTML = `<div class="empty">За два года ${esc(A)} и ${esc(B)} не встречались — по крайней мере под этими id команд.</div>`; return; }
+  const series = []; for (const x of h.rows) { const last = series[series.length - 1]; if (last && x.series_id && last.id === x.series_id) last.maps.push(x); else series.push({id: x.series_id, maps: [x]}); }
+  $('#mTab').innerHTML = `<div class="two wide"><section class="card" style="padding:8px 0"><div style="padding:16px 24px 14px"><h2 class="h2">Серии за два года</h2></div>
+      ${series.map(s => { const wa = s.maps.filter(m => m.won_a).length, wb = s.maps.length - wa;
+        return `<div class="row" style="cursor:default"><span class="mono t3" style="width:86px;flex-shrink:0">${dmy(s.maps[0].ts)}</span><span style="flex:1;font-weight:700;color:${wa > wb ? 'var(--text)' : 'var(--t3)'};text-align:right">${esc(A)}</span>
+          <span class="mono" style="font-size:16px;font-weight:700;width:60px;text-align:center"><span class="${wa > wb ? 'ca' : ''}">${wa}</span> : <span class="${wb > wa ? 'cb' : ''}">${wb}</span></span><span style="flex:1;font-weight:700;color:${wb > wa ? 'var(--text)' : 'var(--t3)'}">${esc(B)}</span>
+          <span style="display:flex;gap:4px;width:110px;justify-content:flex-end" data-tip="Карты серии по порядку, синим — победы ${esc(A)}">${s.maps.slice().reverse().map(m => `<span class="dot" style="width:10px;height:10px;border-radius:3px;background:${m.won_a ? 'var(--a)' : 'var(--b)'}"></span>`).join('')}</span></div>`; }).join('')}
+      ${h.maps > h.rows.length ? `<div class="sect muted small">Показаны последние ${h.rows.length} карт из ${h.maps}.</div>` : ''}</section>
+    <aside class="col" style="gap:20px"><section class="card pad-s col" style="gap:14px"><h2 class="h3">Итог по картам</h2>
+      <div class="big"><span class="disp n ca" style="font-size:40px">${h.wins_a}</span><span class="lbl mid">${h.maps} карт</span><span class="disp n cb" style="font-size:40px">${h.wins_b}</span></div>${bar(h.wins_a / h.maps, 8)}
+      <p class="muted" style="font-size:13px">Модель учитывает личные встречи с усадкой к нейтральному значению: несколько карт почти не двигают прогноз. Вклад сейчас: ${(r.contributions.h2h || 0) >= 0 ? '+' : '−'}${Math.abs(r.contributions.h2h || 0).toFixed(2)} логита.</p></section></aside></div>`;
+}
+function policyText(pl) { if (!pl || !pl.policy_reason) return ''; return '\n' + (pl.policy_bet ? 'Политика: ставка ' + rub(pl.policy_stake) : 'Политика: без ставки') + ' — ' + pl.policy_reason; }
+function tabBet() {
+  const r = M.r, v = r.verdict, A = r.team_a.name, B = r.team_b.name, {isMap} = probs(), f = v.fair;
+  let odds = '';
+  if (r.odds) { const o = r.odds, cls = x => x > 0 ? 'pos' : 'neg', sg = x => (x > 0 ? '+' : '') + (100 * x).toFixed(1);
+    odds = `<details><summary>Кэфы против одной модели, без смешивания с линией</summary><div class="scroll" style="margin-top:10px"><table><tr><th></th><th class="num">кэф</th><th class="num">линия</th><th class="num">модель</th><th class="num">запас, п.п.</th><th class="num">EV</th></tr>
+      <tr><td>${esc(A)}</td><td class="num">${o.odds_a}</td><td class="num">${pct(o.implied_a)}</td><td class="num">${pct(r.p_bet)}</td><td class="num ${cls(o.edge_a)}">${sg(o.edge_a)}</td><td class="num ${cls(o.ev_a)}">${o.ev_a.toFixed(3)}</td></tr>
+      <tr><td>${esc(B)}</td><td class="num">${o.odds_b}</td><td class="num">${pct(o.implied_b)}</td><td class="num">${pct(1 - r.p_bet)}</td><td class="num ${cls(o.edge_b)}">${sg(o.edge_b)}</td><td class="num ${cls(o.ev_b)}">${o.ev_b.toFixed(3)}</td></tr></table></div>
+      <p class="muted small" style="margin-top:8px">Маржа букмекера ${pct(o.margin)}. Решение принимается по рекомендации выше: она считает запас от смешанной вероятности.</p></details>`; }
+  $('#mTab').innerHTML = `<div class="two wide"><div class="col" style="gap:24px"><section class="card pad col" style="gap:18px"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2 class="h2">Ставка: ${isMap ? 'карта ' + r.map_no : 'серия bo' + r.bo}</h2>${confChip(v)}</div>
+      <div class="frow"><label class="f" style="width:170px">BetBoom, кэф на ${esc(short(A))}<input type="number" id="bOa" step="0.01" placeholder="1.80" value="${esc(M.oddsA)}"></label><label class="f" style="width:170px">BetBoom, кэф на ${esc(short(B))}<input type="number" id="bOb" step="0.01" placeholder="2.00" value="${esc(M.oddsB)}"></label><button class="btn pri" id="bCalc">Пересчитать</button></div>
+      ${recFull(v)}
+      ${f ? `<div class="tiles"><div class="tile" data-tip="Эталонная линия и вероятности без маржи"><span class="lbl">Эталон · ${esc(f.book)}</span><span class="mono v">${f.odds_a.toFixed(2)} <span style="color:#4A505A">/</span> ${f.odds_b.toFixed(2)}</span><span class="s">без маржи ${p0(f.p_a)} / ${p0(f.p_b)}</span></div><div class="tile"><span class="lbl">Цена без маржи</span><span class="mono v">${f.fair_a.toFixed(2)} <span style="color:#4A505A">/</span> ${f.fair_b.toFixed(2)}</span><span class="s">ставка имеет смысл при кэфе заметно выше</span></div></div>` : ''}
+      <div class="tiles"><div class="tile"><span class="lbl">Смешанная вероятность</span><span class="mono v">${v.p_blend != null ? pct(v.p_blend) : '—'}</span><span class="s">линия и модель, доли в журнале</span></div>
+        <div class="tile"><span class="lbl">Ставить на ${esc(short(A))} от</span><span class="mono v ca">${v.min_odds_a ? v.min_odds_a.toFixed(2) : '—'}</span><span class="s">справедливый ${fair(r.p_bet)}</span></div>
+        <div class="tile"><span class="lbl">Ставить на ${esc(short(B))} от</span><span class="mono v cb">${v.min_odds_b ? v.min_odds_b.toFixed(2) : '—'}</span><span class="s">справедливый ${fair(1 - r.p_bet)}</span></div></div>${odds}</section>
+    <section class="card pad col" style="gap:16px"><h2 class="h2">Запись в журнал</h2><p class="t3" style="font-size:14px">По умолчанию запись бумажная: журнал копит прогнозы и решения политики, чтобы проверить стратегию до реальных денег.</p>
+      <div class="frow"><label class="f" style="width:240px">Тип записи<select class="in" id="bSide"><option value="">бумага, без ставки</option><option value="a">реальная ставка на ${esc(short(A))}</option><option value="b">реальная ставка на ${esc(short(B))}</option></select></label><label class="f" style="width:140px">Сумма, ₽<input type="number" id="bStake" step="1" placeholder="${v.stake ? Math.round(v.stake) : ''}"></label><button class="btn sec" id="bRec">В журнал</button><a href="#journal" style="font-size:14px;font-weight:700;height:44px;display:inline-flex;align-items:center">Открыть журнал →</a></div></section></div>
+    <aside class="col" style="gap:20px"><section class="card pad-s col" style="gap:12px"><h2 class="h3">Как принимается решение</h2><ul class="chk"><li>${I.yes}Смешанная вероятность: линия и модель с весами из настроек политики</li><li>${I.yes}Ставка только при запасе от порога и положительном ожидании</li><li>${I.yes}Размер по Келли с понижением, в флетах, с потолком на ставку</li><li>${I.yes}При средней уверенности данных — на полфлета меньше, при низкой — пропуск</li></ul><a href="#journal" style="font-size:14px;font-weight:700">Настройки политики →</a></section>
+      ${marketsSide(r)}</aside></div>`;
+  $('#bCalc').onclick = () => { M.oddsA = $('#bOa').value; M.oddsB = $('#bOb').value; calc(); };
+  $('#bRec').onclick = async () => { try { M.oddsA = $('#bOa').value; M.oddsB = $('#bOb').value; const body = payload(); body.bet_side = $('#bSide').value || null; body.stake = $('#bStake').value || null;
+    if (lastVerdict) { body.p_claude = lastVerdict.p_a; body.confidence = lastVerdict.confidence; }
+    const x = await api('/api/bets', body); toast('Записано в журнал, № ' + x.id + policyText(x.policy), 'ok'); } catch (e) { fail(e); } };
+}
+
+// ================================================================ LIVE
+let liveSel = null;
+VIEWS.live = async (args, s) => {
+  if (args[0]) liveSel = String(args[0]);
+  view(`<div class="livegrid" style="display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start"><aside class="col" style="gap:12px" id="liveSide"><div class="skel" style="height:120px"></div></aside><div class="col" style="gap:24px" id="liveMain"><div class="skel" style="height:420px"></div></div></div>`, s);
+  const load = async force => { await loadLive(force); if (s !== seq) return; if (!F.items.length) { try { F.items = (await api('/api/forecasts')).items; } catch (e) {} } if (s === seq) renderLive(); };
+  await load(true);
+  every(30000, () => load(true).catch(() => {}));
+};
+function renderLive() {
+  const gs = LIVE.games; let g = gs.find(x => String(x.match_id) === liveSel) || gs[0]; liveSel = g ? String(g.match_id) : null;
+  const soon = F.items.filter(f => !f.error && f.status === 'ожидается').sort((x, y) => (x.starts || 9e12) - (y.starts || 9e12)).slice(0, 4);
+  $('#liveSide').innerHTML = `<span class="lbl">Сейчас в эфире</span>` + (gs.map(x => `<a class="side ${x === g ? 'on' : ''}" data-id="${x.match_id}">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--redt);font-weight:700"><span style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:var(--red)"></span>${x.radiant_series_wins != null ? 'карта ' + (x.radiant_series_wins + x.dire_series_wins + 1) + ' · ' : ''}${x.drafting ? 'драфт' : clock(x.game_time)}</span><span class="mono" style="color:var(--t3)">${x.bo ? 'bo' + x.bo : ''}</span></div>
+      <div class="jr"><span>${esc(x.team_name_radiant)}</span><span class="mono">${x.radiant_series_wins != null ? x.radiant_series_wins : x.radiant_score}</span></div><div class="jr"><span>${esc(x.team_name_dire)}</span><span class="mono">${x.dire_series_wins != null ? x.dire_series_wins : x.dire_score}</span></div>
+      ${x.p_now != null ? bar(x.p_now, 4) : ''}</a>`).join('') || `<div class="muted" style="font-size:13px;padding:4px 0">Лиговых игр сейчас нет.</div>`) +
+    (soon.length ? `<span class="lbl" style="margin-top:16px">Скоро начнутся</span>` + soon.map(f => `<a class="side" href="#match/${f.team_a}/${f.team_b}"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3)"><span class="mono">${f.starts ? hm(f.starts) : 'время не указано'}</span><span class="mono">bo${f.bo}</span></div>
+      <div class="jr" style="${f.p_bet < 0.5 ? 'color:var(--t3)' : ''}"><span>${esc(f.name_a)}</span><span class="mono ca">${p0(f.p_bet)}</span></div><div class="jr" style="${f.p_bet >= 0.5 ? 'color:var(--t3)' : ''}"><span>${esc(f.name_b)}</span><span class="mono cb">${p0(1 - f.p_bet - (f.p_draw || 0))}</span></div></a>`).join('') : '') +
+    `<div class="muted small" style="margin-top:8px">Источник: ${LIVE.source === 'steam' ? 'Steam' : 'OpenDota — отстаёт на несколько минут и иногда показывает уже завершённые карты'}${LIVE.error ? '. ' + esc(LIVE.error) : ''}</div>`;
+  $$('#liveSide [data-id]').forEach(a => a.onclick = () => { liveSel = a.dataset.id; history.replaceState(null, '', '#live/' + liveSel); renderLive(); });
+  if (!g) { $('#liveMain').innerHTML = `<div class="empty">Сейчас в эфире нет лиговых карт. Страница обновляется каждые 30 секунд.</div>`; return; }
+  const A = g.team_name_radiant, B = g.team_name_dire, p = g.p_now, sw = g.radiant_series_wins != null, mapNo = sw ? g.radiant_series_wins + g.dire_series_wins + 1 : null;
+  const decider = sw && g.bo && g.radiant_series_wins === g.dire_series_wins && g.radiant_series_wins === Math.floor(g.bo / 2);
+  const lead = g.gold_lead, tr = g.track || [];
+  const prev = tr.filter(t => g.game_time - t.t >= 480).slice(-1)[0];
+  const delta = prev && p != null ? 100 * (p - prev.p) : null;
+  let chart = `<div class="empty" style="padding:28px">График появится, когда наберётся хотя бы две точки: страница сохраняет прогноз при каждом обновлении, пока открыта.</div>`;
+  if (tr.length >= 2) { const xs = tr.map(t => t.t / 60), ys = tr.map(t => t.p).concat([g.p_pre, g.p_post].filter(v => v != null));
+    const lo = Math.min(0.2, Math.floor(Math.min(...ys) * 10) / 10), hi = Math.max(0.8, Math.ceil(Math.max(...ys) * 10) / 10), x1 = Math.max(10, Math.ceil(Math.max(...xs) / 5) * 5);
+    chart = lineSvg({W: 900, H: 250, L: 44, R: 60, pts: tr.map(t => ({x: t.t / 60, y: t.p, tip: `<b>${clock(t.t)}</b> — ${esc(short(A))} ${pct(t.p)}${t.gold != null ? `<small>золото: ${t.gold >= 0 ? esc(short(A)) : esc(short(B))} +${(Math.abs(t.gold) / 1000).toFixed(1)}к</small>` : ''}`})),
+      x0: 0, x1, y0: lo, y1: hi, color: '#4D8DFF', textColor: '#6EA2FF', lastText: pct(p), label: `Шанс ${A} по минутам`,
+      yTicks: [{v: hi, text: p0(hi)}, {v: 0.5, text: '50%', dash: '4 4'}, {v: lo, text: p0(lo)}], xTicks: Array.from({length: x1 / 5 + 1}, (_, i) => ({v: i * 5, text: i * 5 + "'"}))}); }
+  const fs = (g.factors || []).map(f => ({name: FEATURE[f.key] || f.key, v: f.v})).slice(0, 6);
+  const heroes = (list, name, col, sideName) => `<div class="col"><span style="font-size:12px;font-weight:700;color:${col};padding-bottom:4px">${esc(short(name))} · ${sideName}</span>${list.map(x => `<div class="hero">${heroPic(x.hero)}<span class="col" style="min-width:0"><span style="font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(heroById[x.hero] ? heroById[x.hero].name : 'герой не выбран')}</span><span style="font-size:12px;color:var(--muted)">${esc(x.name || '—')}</span></span></div>`).join('')}</div>`;
+  $('#liveMain').innerHTML = `<section class="card col" style="padding:28px 32px;gap:24px"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="chip live"><span class="dot" style="background:var(--red)"></span>LIVE</span>
+      <span class="chip mono">${mapNo ? 'Карта ' + mapNo + ' · ' : ''}${g.drafting ? 'драфт' : clock(g.game_time)}</span>${g.bo ? `<span class="chip">bo${g.bo}${decider ? ' · решающая карта' : ''}</span>` : ''}${sw ? `<span class="chip">счёт серии ${g.radiant_series_wins}:${g.dire_series_wins}</span>` : ''}
+      <span style="margin-left:auto;font-size:12px;color:var(--muted)">обновляется каждые 30 с</span></div>
+    <div class="vs"><div class="t">${logo(g.logo_radiant, A, 60, 'var(--a)')}<div class="meta" style="gap:6px"><span class="disp name" style="font-size:24px;font-weight:700">${esc(A)}</span><span style="font-size:13px;color:var(--muted)">Radiant</span></div></div>
+      <div class="col mid" style="align-items:center;gap:6px"><span class="disp mono" style="font-size:40px;font-weight:700;letter-spacing:0">${g.radiant_score ?? 0} <span style="color:#4A505A">:</span> ${g.dire_score ?? 0}</span><span class="lbl">убийства</span></div>
+      <div class="t r">${logo(g.logo_dire, B, 60, 'var(--b)')}<div class="meta" style="gap:6px"><span class="disp name" style="font-size:24px;font-weight:700">${esc(B)}</span><span style="font-size:13px;color:var(--muted)">Dire</span></div></div></div>
+    <div class="t3cols" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+      <div class="tile" style="align-items:center;text-align:center"><span class="lbl">Преимущество в золоте</span><span class="mono v" style="font-size:20px;color:${lead == null ? 'var(--muted)' : (lead >= 0 ? 'var(--at)' : 'var(--bt)')}">${lead == null ? 'нет данных' : esc(short(lead >= 0 ? A : B)) + ' +' + (Math.abs(lead) / 1000).toFixed(1) + 'k'}</span></div>
+      <div class="tile" style="align-items:center;text-align:center"><span class="lbl">До карты</span><span class="mono v" style="font-size:20px">${g.p_pre != null ? pct(g.p_pre) : '—'}${g.p_post != null ? ` <small>→ ${pct(g.p_post)} с драфтом</small>` : ''}</span></div>
+      <div class="tile" style="align-items:center;text-align:center"><span class="lbl">${g.p_series != null ? 'Шанс взять серию' : 'Зрителей'}</span><span class="mono v" style="font-size:20px">${g.p_series != null ? `<span class="ca">${pct(g.p_series)}</span> <span style="color:#4A505A">/</span> <span class="cb">${pct(1 - g.p_series)}</span>` : num(g.spectators || 0)}</span></div></div>
+    ${p != null ? `<div class="col" style="gap:10px"><div class="big" style="align-items:flex-end"><span class="disp n ca" style="font-size:56px">${pct(p)}</span><span class="mid" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding-bottom:6px;text-align:center"><span class="lbl">шанс выиграть карту${decider ? ' и серию' : ''}</span>${delta != null && Math.abs(delta) >= 0.1 ? `<small style="font-size:12px;color:${delta >= 0 ? 'var(--at)' : 'var(--redt)'};font-weight:700">${delta >= 0 ? '+' : '−'}${Math.abs(delta).toFixed(1)} с ${Math.floor(prev.t / 60)}-й минуты</small>` : ''}</span><span class="disp n cb" style="font-size:56px">${pct(1 - p)}</span></div>${bar(p, 12)}</div>` : `<div class="warn">${I.warn}<span>${esc(g.error || 'прогноз недоступен')}</span></div>`}
+    ${warnHtml(g.warnings)}<div class="frow"><button class="btn sec sm" id="liveOpen">Открыть разбор карты${I.arrow}</button><span class="muted small" style="align-self:center">составы, драфт, рынки и ставка на эту карту</span></div></section>
+    <section class="card pad col" style="gap:16px"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><h2 class="h2">Как менялся прогноз</h2><span style="display:flex;gap:16px;font-size:12px;color:var(--t3);flex-wrap:wrap">${g.p_pre != null ? `<span>до драфта <b class="mono" style="color:var(--text)">${p0(g.p_pre)}</b></span>` : ''}${g.p_post != null ? `<span>после драфта <b class="mono" style="color:var(--text)">${p0(g.p_post)}</b></span>` : ''}${g.p_draft != null ? `<span data-tip="Модель только по героям, без команд и игроков">чисто пик <b class="mono" style="color:var(--text)">${p0(g.p_draft)}</b></span>` : ''}${p != null ? `<span>сейчас <b class="mono ca">${pct(p)}</b></span>` : ''}</span></div>
+      ${chart}<p style="font-size:13px;color:var(--muted)">Линия — шанс ${esc(A)}. Выше пунктира — фаворит ${esc(short(A))}, ниже — ${esc(short(B))}. Модель по ходу карты видит минуту и золото, но не башни и Рошана.</p></section>
+    <div class="g2" style="gap:24px;align-items:start"><section class="card pad-s col" style="gap:12px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 class="h3">Драфт${mapNo ? ' карты ' + mapNo : ''}</h2>${g.p_draft != null ? `<span class="chip" data-tip="Модель только по героям, без команд и игроков">чисто пик <b class="mono ca">${pct(g.p_draft)}</b> / <b class="mono cb">${pct(1 - g.p_draft)}</b></span>` : ''}</div><div class="g2" style="gap:20px;grid-template-columns:repeat(2,minmax(0,1fr))">${heroes(g.players_radiant, A, 'var(--at)', 'Radiant')}${heroes(g.players_dire, B, 'var(--bt)', 'Dire')}</div></section>
+      <section class="card pad-s col" style="gap:16px"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><h2 class="h3">Что повлияло</h2><span style="display:flex;gap:12px;font-size:12px;color:var(--t3)"><span style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:var(--a)"></span>${esc(short(A))}</span><span style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:var(--b)"></span>${esc(short(B))}</span></span></div>
+        <div class="col" style="gap:4px">${factors(fs, A, B, true)}</div>${fs.length ? `<div style="padding:14px;border-radius:10px;background:var(--inset);font-size:13px;line-height:1.55;color:var(--t2)">Главное — «${esc(fs[0].name.toLowerCase())}»: в пользу ${esc(fs[0].v >= 0 ? A : B)}.${lead != null && !g.drafting ? ` По золоту впереди ${esc(lead >= 0 ? A : B)}.` : ''}</div>` : ''}</section></div>`;
+  $('#liveOpen').onclick = () => openFromLive(g);
+}
+function openFromLive(g) {
+  const key = pairKey(g.team_id_radiant, g.team_id_dire), hs = l => l.map(x => x.hero).filter(Boolean);
+  PENDING = {key, roster: {a: g.players_radiant.map(x => x.id).filter(Boolean), b: g.players_dire.map(x => x.id).filter(Boolean)},
+    who: {a: g.players_radiant.map(x => x.hero && x.id ? String(x.id) : ''), b: g.players_dire.map(x => x.hero && x.id ? String(x.id) : '')},
+    leadA: g.radiant_series_wins || 0, leadB: g.dire_series_wins || 0, bo: g.bo, ig: g.gold_lead != null ? {minute: Math.floor((g.game_time || 0) / 60), lead: g.gold_lead} : null};
+  M = null;
+  const a = hs(g.players_radiant), b = hs(g.players_dire);
+  location.hash = `#match/${g.team_id_radiant}/${g.team_id_dire}/map` + (a.length && b.length ? `/${a.join(',')}/${b.join(',')}/radiant` : '');
+}
+
+// ================================================================ ТОЧНОСТЬ
+const H = {filter: 'all', days: 14, data: null};
+VIEWS.accuracy = async (args, s) => {
+  view(`<div class="skel"></div><div class="skel" style="height:360px"></div>`, s);
+  const [r, hs] = await Promise.all([api('/api/backtest'), api('/api/history?days=' + H.days)]);
+  if (s !== seq) return;
+  if (!r.models) { view(`<div class="empty">Модель не обучена. Нажмите на индикатор модели в шапке и запустите синхронизацию.</div>`, s); return; }
+  H.data = hs;
+  const ch = r.chosen || {pre: 'pre', post: 'post'}, post = r.models[ch.post], pre = r.models[ch.pre], o = post.overall, el = post.baseline_elo;
+  const cmp = (t, v, c, strong) => `<div class="cmp" style="${strong ? '' : 'color:var(--t3)'}"><span style="${strong ? 'font-weight:700' : ''}">${t}</span><span class="track"><span class="fill" style="width:${100 * v}%;background:${c}"></span></span><span class="mono" style="text-align:right;${strong ? 'font-weight:700' : ''}">${(100 * v).toFixed(1)}</span></div>`;
+  const ks = Object.keys(post.by_month), vs = ks.map(k => post.by_month[k].logloss);
+  const lo = Math.min(...vs, el.logloss) - 0.012, hi = 0.6931 + 0.006;
+  const months = lineSvg({W: 440, H: 310, L: 16, R: 52, T: 20, B: 50, maxW: 520, dots: true, color: '#C6F24E', x0: 0, x1: ks.length - 1, y0: lo, y1: hi, lastText: vs[vs.length - 1].toFixed(3), label: 'Log loss по периодам',
+    pts: vs.map((v, i) => ({x: i, y: v, tip: `<b>${ks[i]}</b>: log loss ${v.toFixed(3)}<small>${num(post.by_month[ks[i]].n)} карт, точность ${pct(post.by_month[ks[i]].acc)}</small>`})),
+    yTicks: [{v: 0.6931, text: 'монетка 0.693', dash: '4 4', right: true}, {v: el.logloss, text: 'рейтинг команд ' + el.logloss.toFixed(3), dash: '2 4', right: true}, {v: lo, text: ''}],
+    xTicks: ks.map((k, i) => ({v: i, text: k.slice(2)})).filter((_, i) => i % Math.ceil(ks.length / 5) === 0)});
+  const t = r.totals || {}, mp = r.maps || {};
+  let spec = `<div class="tiles" style="margin-top:16px"><div class="col" style="gap:4px"><span class="lbl">Log loss</span><span class="mono" style="font-size:20px;font-weight:700">${o.logloss.toFixed(4)}</span><span class="s muted small">рейтинг ${el.logloss.toFixed(4)} · монетка 0.6931</span></div>
+    <div class="col" style="gap:4px"><span class="lbl">Brier</span><span class="mono" style="font-size:20px;font-weight:700">${o.brier.toFixed(4)}</span><span class="muted small">монетка 0.2500</span></div>
+    <div class="col" style="gap:4px"><span class="lbl">Признаков</span><span class="mono" style="font-size:20px;font-weight:700">${post.features.length} / ${pre.features.length}</span><span class="muted small">после драфта / до драфта</span></div>
+    <div class="col" style="gap:4px"><span class="lbl">Проверено карт</span><span class="mono" style="font-size:20px;font-weight:700">${num(o.n)}</span><span class="muted small">walk-forward, шаг 2 месяца</span></div>
+    ${r.models.draft ? `<div class="col" style="gap:4px"><span class="lbl">Чисто пик</span><span class="mono" style="font-size:20px;font-weight:700">${r.models.draft.overall.logloss.toFixed(4)}</span><span class="muted small">точность ${pct(r.models.draft.overall.acc)}, только герои</span></div>` : ''}
+    <div class="col" style="gap:4px"><span class="lbl">До драфта</span><span class="mono" style="font-size:20px;font-weight:700">${pre.overall.logloss.toFixed(4)}</span><span class="muted small">точность ${pct(pre.overall.acc)}, набор ${esc(ch.pre)}</span></div>
+    ${t.kills_post ? `<div class="col" style="gap:4px"><span class="lbl">Тотал килов, ошибка</span><span class="mono" style="font-size:20px;font-weight:700">${t.kills_post.mae}</span><span class="muted small">простое среднее ${t.kills_post.mae_base} · разброс ±${t.kills_post.sigma}</span></div>` : ''}
+    ${t.dur_post ? `<div class="col" style="gap:4px"><span class="lbl">Длительность, ошибка</span><span class="mono" style="font-size:20px;font-weight:700">${t.dur_post.mae} мин</span><span class="muted small">среднее ${t.dur_post.mae_base} · разброс ±${t.dur_post.sigma}</span></div>` : ''}
+    ${mp.n ? `<div class="col" style="gap:4px"><span class="lbl">bo3 в три карты</span><span class="mono" style="font-size:20px;font-weight:700">${pct(mp.p3_fact)}</span><span class="muted small">при независимых картах ${pct(mp.p3_pred)} · поправка ×${mp.k3}</span></div>` : ''}</div>`;
+  if (r.ingame && !r.ingame.error) { const ms = Object.keys(r.ingame).map(Number).sort((a, b) => a - b);
+    spec += `<div class="lbl" style="margin-top:24px">Модель по ходу карты</div><div class="scroll"><table><tr><th>Минута</th>${ms.map(m => `<th class="num">${m}</th>`).join('')}</tr><tr><td class="muted">log loss с золотом</td>${ms.map(m => `<td class="num"><b>${r.ingame[m].model.logloss.toFixed(3)}</b></td>`).join('')}</tr><tr><td class="muted">только предматчевая</td>${ms.map(m => `<td class="num">${r.ingame[m].pregame_only.logloss.toFixed(3)}</td>`).join('')}</tr></table></div>`; }
+  spec += `<div class="lbl" style="margin-top:24px">Коэффициенты модели после драфта</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">${Object.entries(post.coefs).filter(([k]) => k !== 'intercept').sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).map(([k, v]) => `<span class="chip">${esc(FEATURE[k] || k)} <b class="mono" style="color:${v >= 0 ? 'var(--at)' : 'var(--bt)'}">${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(3)}</b></span>`).join('')}</div>
+    <div class="lbl" style="margin-top:24px">Проверка на кэфах букмекера</div><div id="bookBox" class="col" style="gap:12px;margin-top:10px"><span class="muted">загрузка…</span></div>`;
+  view(`<div class="col" style="gap:10px;max-width:760px"><div class="lbl">Проверка на истории</div><h1 class="disp" style="font-size:40px;font-weight:700;line-height:1.1">Насколько модели можно верить</h1>
+      <p style="font-size:15px;line-height:1.6;color:var(--t3)">Раз в два месяца модель переобучается и предсказывает матчи, которых ещё не видела. Так она проверена на ${num(o.n)} картах — ниже результат как есть. Последняя проверка ${dmy(r.built)}.</p></div>
+    <div class="g3"><section class="card pad-s col" style="gap:14px;border-color:rgba(198,242,78,.35)"><span class="lbl" style="color:var(--lime)">После драфта</span><span class="disp" style="font-size:48px;font-weight:700;line-height:1">${pct(o.acc)}</span><span style="font-size:14px;color:var(--t2)">карт, где модель верно назвала победителя</span></section>
+      <section class="card pad-s col" style="gap:14px"><span class="lbl">До драфта</span><span class="disp" style="font-size:48px;font-weight:700;line-height:1">${pct(pre.overall.acc)}</span><span style="font-size:14px;color:var(--t2)">прогноз по составам, ещё без пиков</span></section>
+      <section class="card pad-s col" style="gap:12px"><span class="lbl">С чем сравнить</span>${cmp('Модель', o.acc, 'var(--lime)', true)}${cmp('Рейтинг команд', el.acc, '#6B717C')}${cmp('Монетка', 0.5, '#3A3F48')}<span style="font-size:13px;color:var(--muted)">Модель угадывает на ${Math.round(100 * (o.acc - el.acc))} карты из 100 чаще, чем простой рейтинг.</span></section></div>
+    <div class="g2"><section class="card pad col" style="gap:16px"><h2 class="h2">Проценты честные?</h2><p style="font-size:14px;line-height:1.55;color:var(--t2)">Если модель говорит «70%», команда должна выигрывать 7 раз из 10. Точки у пунктира — так и есть. Чем крупнее точка, тем больше карт в группе.</p>${calSvg(post.calibration)}
+        <div style="display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted)"><span>по горизонтали — прогноз модели</span><span>по вертикали — доля побед на деле</span></div></section>
+      <section class="card pad col" style="gap:16px"><h2 class="h2">Модель не деградирует</h2><p style="font-size:14px;line-height:1.55;color:var(--t2)">Ошибка прогноза (log loss) по месяцам проверки. Ниже — лучше. Пунктиры — рейтинг команд и монетка.</p>${months}
+        <div style="display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted)"><span>каждая точка — месяц</span><span>последняя проверка ${dmy(r.built)}</span></div></section></div>
+    <section class="card" style="padding:8px 0" id="histCard"></section>
+    <details class="card" style="padding:20px 28px"><summary style="font-size:15px">Для специалистов: метрики модели</summary>${spec}</details>`, s);
+  renderHistory(); loadBook();
+};
+function calSvg(cal) {
+  const x = p => 40 + p * 360, y = p => 280 - p * 260, mx = Math.max(...cal.map(c => c.n)), g = [0, .25, .5, .75, 1];
+  return `<svg viewBox="0 0 440 310" style="width:100%;height:auto;max-width:520px;align-self:center" role="img" aria-label="Калибровка: прогноз модели против доли побед"><g stroke="#1E2228">${g.map(t => `<line x1="40" x2="400" y1="${y(t)}" y2="${y(t)}"/><line y1="20" y2="280" x1="${x(t)}" x2="${x(t)}"/>`).join('')}</g>
+    <line x1="40" y1="280" x2="400" y2="20" stroke="#5B616C" stroke-dasharray="4 4"/>
+    <text x="32" y="24" text-anchor="end">100</text><text x="32" y="154" text-anchor="end">50</text><text x="32" y="284" text-anchor="end">0</text><text x="40" y="298" text-anchor="middle">0%</text><text x="220" y="298" text-anchor="middle">50%</text><text x="400" y="298" text-anchor="middle">100%</text>
+    ${cal.map(c => `<circle cx="${x(c.p_mean).toFixed(1)}" cy="${y(c.y_mean).toFixed(1)}" r="${(3 + 8 * Math.sqrt(c.n / mx)).toFixed(1)}" fill="#C6F24E" stroke="#131519" stroke-width="2" data-tip="Прогноз <b>${pct(c.p_mean)}</b> → на деле <b>${pct(c.y_mean)}</b><small>${num(c.n)} карт в группе ${c.bin}</small>"/>`).join('')}</svg>`;
+}
+function renderHistory() {
+  const d = H.data, box = $('#histCard'); if (!box || !d) return;
+  const rows = d.items.filter(h => H.filter === 'all' || (H.filter === 'ok' ? h.ok === true : h.ok === false));
+  box.innerHTML = `<div style="padding:20px 28px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap"><div class="col" style="gap:4px"><h2 class="h2">История прогнозов</h2><span style="font-size:13px;color:var(--t3)">Серии за ${d.days} дней: верных ${d.hits} из ${d.n} (${d.n ? pct(d.hits / d.n, 0) : '—'}). Прогноз — «как в тот день»: модель этих матчей ещё не видела.</span></div>
+      <div style="display:flex;gap:8px">${[['all', 'Все'], ['ok', 'Верные'], ['miss', 'Ошибки']].map(([k, t]) => `<button class="fchip ${H.filter === k ? 'on' : ''}" data-hf="${k}" style="height:34px">${t}</button>`).join('')}</div></div>
+    <div class="hrow lbl" style="display:grid;grid-template-columns:90px minmax(0,1fr) 220px 90px 110px;gap:16px;padding:10px 28px;border-top:1px solid var(--hair)"><span>Дата</span><span>Матч</span><span class="hp2">Прогноз</span><span class="hs">Счёт</span><span>Итог</span></div>
+    ${rows.slice(0, H.days > 14 ? 400 : 12).map(h => `<a class="hrow plain" href="#match/${h.team_a}/${h.team_b}" style="display:grid;grid-template-columns:90px minmax(0,1fr) 220px 90px 110px;gap:16px;align-items:center;padding:14px 28px;border-top:1px solid var(--hair);font-size:14px">
+      <span class="mono" style="color:var(--t3)">${dm(h.ts)}</span><span class="col" style="gap:2px;min-width:0"><span style="font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(h.name_a)} — ${esc(h.name_b)}</span><span style="font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">bo${h.bo}${h.tournament ? ' · ' + esc(h.tournament) : ''}</span></span>
+      <span class="hp2" style="display:flex;align-items:center;gap:8px;min-width:0"><span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(h.pick)}</span><span class="mono" style="color:var(--t3)">${p0(h.p_pick)}</span></span>
+      <span class="mono hs" style="font-weight:700">${h.score_a}:${h.score_b}</span><span>${h.ok == null ? '<span class="miss">ничья</span>' : (h.ok ? `<span class="ok">${I.ok12}верно</span>` : `<span class="miss">${I.x12}мимо</span>`)}</span></a>`).join('') || `<div class="sect muted">Записей нет.</div>`}
+    <div style="padding:16px 28px 12px;border-top:1px solid var(--hair)">${H.days > 14 ? `<span class="muted" style="font-size:13px">Показаны серии за ${H.days} дней.</span>` : `<a href="#" id="histAll" style="font-size:14px;font-weight:700">Показать все прогнозы за 60 дней →</a>`}</div>`;
+  $$('#histCard [data-hf]').forEach(b => b.onclick = () => { H.filter = b.dataset.hf; renderHistory(); });
+  if ($('#histAll')) $('#histAll').onclick = async e => { e.preventDefault(); try { H.days = 60; H.data = await api('/api/history?days=60'); renderHistory(); } catch (x) { fail(x); } };
+}
+async function loadBook() {
+  const box = $('#bookBox'); if (!box) return;
+  try { const r = await api('/api/book/backtest');
+    if (!r.n) { box.innerHTML = `<div class="rec cond">${I.cond}<div><span class="k">Кэфов в базе нет</span>Главный непроверенный вопрос — обыгрывает ли модель линию букмекера. ${r.key ? 'Ключ задан: выполните <code>python -m dota2bets book history --days 120</code>.' : 'Задайте переменную окружения <code>ODDSPAPI_KEY</code> и выполните <code>python -m dota2bets book history --days 120</code>,'} либо импортируйте свой файл: <code>book import odds.csv</code>.</div></div>`; return; }
+    const pol = v => v.bets ? `${v.bets} ставок, ROI <b class="${v.roi >= 0 ? 'pos' : 'neg'}">${(100 * v.roi).toFixed(1)}%</b>, CLV ${v.clv == null ? '—' : (100 * v.clv).toFixed(1) + '%'}` : 'ставок 0';
+    const better = r.sources['модель'].logloss < r.sources['линия на закрытии'].logloss;
+    box.innerHTML = `<div class="rec ${better ? 'bet' : 'skip'}">${I[better ? 'bet' : 'skip']}<div><span class="k">${better ? 'Модель точнее линии' : 'Модель уступает линии'}</span>${r.n} серий, маржа ${pct(r.margin)}. Лучшая доля линии в смешивании: ${esc(r.best_blend)}. ${r.n < 300 ? 'Серий меньше 300: ROI ненадёжен, смотрите на log loss.' : ''}</div></div>
+      <div class="tiles">${Object.entries(r.sources).map(([k, v]) => `<div class="tile"><span class="lbl">${esc(k)}</span><span class="mono v">${v.logloss.toFixed(4)}</span><span class="s">точность ${pct(v.acc)}</span></div>`).join('')}</div>
+      <div class="scroll"><table><tr><th>Политика на истории</th><th>Результат</th></tr>${Object.entries(r.policy).concat(Object.entries(r.grid)).map(([k, v]) => `<tr><td>${esc(k)}</td><td>${pol(v)}</td></tr>`).join('')}</table></div>
+      <div class="scroll"><table><tr><th>Сегмент</th><th class="num">Серий</th><th class="num">Модель</th><th class="num">Линия</th><th>Политика</th></tr>${Object.entries(r.segments).map(([k, v]) => `<tr><td>${esc(k)}</td><td class="num">${v.n}</td><td class="num">${v['модель'].logloss.toFixed(4)}</td><td class="num">${v['линия'].logloss.toFixed(4)}</td><td>${pol(v['политика'])}</td></tr>`).join('')}</table></div>`;
+  } catch (e) { box.innerHTML = `<span class="muted">${esc(e.message)}</span>`; }
+}
+
+// ================================================================ ТУРНИРЫ
+const BRACKET = `{
+  "teams": ["Team Spirit", "PARIVISION", "Team Liquid", "Team Yandex"],
+  "rounds": [
+    {"name": "полуфинал", "bo": 3, "pairs": [[0, 1], [2, 3]]},
+    {"name": "финал", "bo": 5, "pairs": [["W0-0", "W0-1"]]}
+  ]
+}`;
+VIEWS.tournaments = async (args, s) => {
+  view(`<div class="skel"></div><div class="skel"></div>`, s);
+  const [fc, hs] = await Promise.all([api('/api/forecasts'), api('/api/history?days=30')]);
+  if (s !== seq) return;
+  F.items = fc.items; F.settings = fc.settings; F.built = fc.built;
+  const by = {}; const get = n => by[n] = by[n] || {name: n, played: [], next: []};
+  hs.items.forEach(h => get(h.tournament || 'Без турнира').played.push(h));
+  fc.items.filter(f => !f.error && f.status !== 'сыграна').forEach(f => get(f.tournament || 'Расписание без турнира').next.push(f));
+  const list = Object.values(by).sort((x, y) => (y.next.length > 0) - (x.next.length > 0) || (y.played[0] ? y.played[0].ts : 0) - (x.played[0] ? x.played[0].ts : 0));
+  const tcard = t => { const j = t.played.filter(h => h.ok != null), hits = j.filter(h => h.ok).length;
+    return `<section class="card" style="padding:8px 0"><div style="padding:16px 24px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2 class="h2">${esc(t.name)}</h2>
+      <span style="display:flex;gap:8px;flex-wrap:wrap">${t.next.length ? `<span class="chip lime">впереди ${t.next.length}</span>` : ''}${j.length ? `<span class="chip" data-tip="Прогнозы «как в тот день» на серии турнира за 30 дней">прогноз сбылся ${hits} из ${j.length}</span>` : ''}</span></div>
+      ${t.next.length ? `<div class="lbl sect">Впереди и идут</div>` + t.next.map(f => rowHtml({kind: 'fc', f}) + (f.id ? '' : '')).join('') : ''}
+      ${t.played.length ? `<div class="lbl sect">Сыграны</div>` + t.played.slice(0, 6).map(h => rowHtml({kind: 'hist', h}).replace(`${hm(h.ts)}</span>`, `${dm(h.ts)}</span>`)).join('') : ''}
+      ${t.played.length > 6 ? `<div class="sect muted small">и ещё ${t.played.length - 6} серий за 30 дней — в <a href="#accuracy">истории прогнозов</a></div>` : ''}</section>`; };
+  const sched = fc.items.filter(f => f.id);
+  view(`<div class="col" style="gap:10px;max-width:760px"><div class="lbl">Турниры и расписание</div><h1 class="disp" style="font-size:40px;font-weight:700;line-height:1.1">Турниры</h1>
+      <p style="font-size:15px;line-height:1.6;color:var(--t3)">Серии последних 30 дней и расписание по турнирам, расчёт серии и шансы команд в сетке. OpenDota расписания не знает: его ведёте вы или эталонная линия.</p></div>
+    <div class="two"><div class="col" style="gap:24px">${list.map(tcard).join('') || '<div class="empty">Серий за 30 дней в базе нет.</div>'}</div>
+    <aside class="col" style="gap:20px">
+      <section class="card pad-s col" style="gap:12px"><h2 class="h3">Расписание</h2><p class="t3" style="font-size:13px">По одной серии в строке: <code>Team Liquid vs OG bo3 1.25 3.80</code>. Формат и кэфы необязательны, <code>premium</code> в конце — LAN.</p>
+        <textarea id="scText" rows="4" placeholder="Team Yandex vs MOUZ bo3 1.20 4.30&#10;BetBoom Team vs OG bo3"></textarea><span class="neg small" id="scErr"></span>
+        <div class="frow"><button class="btn pri sm" id="scAdd">Добавить</button><button class="btn sec sm" id="scBook" data-tip="Ближайшие матчи и эталонная линия из OddsPapi. Нужен ключ ODDSPAPI_KEY.">Загрузить с линией</button></div>
+        ${sched.length ? `<div class="col" style="gap:0;margin-top:4px">${sched.map(f => `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--hair);font-size:13px"><span class="mono muted" style="flex-shrink:0;white-space:nowrap;font-size:12px">${f.starts ? dm(f.starts) + ' ' + hm(f.starts) : '—'}</span><a class="plain" href="#match/${f.team_a}/${f.team_b}" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700">${esc(f.name_a)} — ${esc(f.name_b)}</a><button class="chip" data-del="${f.id}" data-tip="Убрать из расписания">✕</button></div>`).join('')}</div>` : ''}</section>
+      <section class="card pad-s col" style="gap:12px"><h2 class="h3">Расчёт серии</h2><div class="frow"><label class="f" style="width:92px">p(A) на карте<input type="number" id="sp" step="0.01" value="0.55" min="0" max="1"></label><label class="f" style="width:84px">Формат<select class="in" id="sbo"><option value="1">bo1</option><option value="2">bo2</option><option value="3" selected>bo3</option><option value="5">bo5</option></select></label>
+        <label class="f">Счёт<span style="display:flex;gap:4px;align-items:center"><input type="number" id="sla" value="0" min="0" style="width:54px"><span class="muted">:</span><input type="number" id="slb" value="0" min="0" style="width:54px"></span></label></div><button class="btn sec sm" id="seriesBtn" style="align-self:flex-start">Посчитать</button><div id="seriesOut" class="col" style="gap:10px"></div></section>
+      <section class="card pad-s col" style="gap:12px"><h2 class="h3">Сетка турнира</h2><p class="t3" style="font-size:13px">Монте-Карло по сетке: шансы на титул и выход в каждую стадию.</p><textarea id="bracket" rows="9">${esc(BRACKET)}</textarea>
+        <div class="frow"><label class="f" style="width:110px">Прогонов<input type="number" id="runs" value="5000" step="1000"></label><button class="btn sec sm" id="bracketBtn" style="height:40px">Симулировать</button></div><div id="bracketOut" class="col" style="gap:10px"></div></section></aside></div>`, s);
+  $('#scAdd').onclick = async () => { try { const r = await api('/api/schedule', {text: $('#scText').value}); $('#scErr').textContent = r.errors.join(' · '); if (r.added.length) { toast('Добавлено серий: ' + r.added.length, 'ok'); route(); } } catch (e) { fail(e); } };
+  $('#scBook').onclick = async () => { try { $('#scBook').disabled = true; const r = await api('/api/book/sync', {days: 3}); toast(`Расписание: добавлено ${r.added}, обновлено ${r.updated}, не сопоставлено ${r.skipped}`, 'ok'); route(); } catch (e) { fail(e); $('#scBook').disabled = false; } };
+  $$('[data-del]').forEach(b => b.onclick = async () => { try { await api('/api/schedule/delete', {id: +b.dataset.del}); route(); } catch (e) { fail(e); } });
+  const prow = (l, p, c) => `<div class="cmp" style="grid-template-columns:minmax(0,1fr) 90px 52px" data-tip="${l}: ${pct(p)}"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l}</span><span class="track"><span class="fill" style="width:${100 * p}%;background:${c}"></span></span><span class="mono" style="text-align:right;font-weight:700">${p0(p)}</span></div>`;
+  $('#seriesBtn').onclick = async () => { try { const d = await api('/api/series', {p: +$('#sp').value, bo: +$('#sbo').value, lead_a: +$('#sla').value, lead_b: +$('#slb').value});
+    $('#seriesOut').innerHTML = `<div class="big"><span class="disp n ca" style="font-size:26px">${pct(d.p_a)}</span><span class="lbl">${d.p_draw ? 'ничья ' + p0(d.p_draw) : 'серия'}</span><span class="disp n cb" style="font-size:26px">${pct(d.p_b)}</span></div>${bar(d.p_a, 8, d.p_draw)}` +
+      d.scores.map(x => { const [a, b] = x.score.split('-').map(Number); return prow('Счёт ' + a + ':' + b, x.p, a > b ? 'var(--a)' : (b > a ? 'var(--b)' : 'var(--dim)')); }).join(''); } catch (e) { fail(e); } };
+  $('#bracketBtn').onclick = async () => { try { $('#bracketOut').innerHTML = '<span class="muted">Считаю…</span>'; const r = await api('/api/bracket', {bracket: JSON.parse($('#bracket').value), runs: +$('#runs').value});
+    $('#bracketOut').innerHTML = '<span class="lbl">Чемпион</span>' + r.champion.map(c => prow(esc(c.team), c.p, 'var(--lime)')).join('') + Object.entries(r.reached).map(([k, v]) => `<span class="lbl" style="margin-top:8px">Дошли до стадии «${esc(k)}»</span><div style="display:flex;gap:6px;flex-wrap:wrap">${v.map(x => `<span class="chip">${esc(x.team)} <b class="mono">${p0(x.p)}</b></span>`).join('')}</div>`).join(''); }
+    catch (e) { $('#bracketOut').innerHTML = ''; fail(e); } };
+};
+
+// ================================================================ ЖУРНАЛ
+VIEWS.journal = async (args, s) => {
+  view(`<div class="skel"></div><div class="skel"></div>`, s);
+  const j = await api('/api/bets'); if (s !== seq) return;
+  const rep = j.report, st = rep.settings, names = {p_model: 'Модель', p_blend: 'Смешанная', p_claude: 'Claude', book: 'Букмекер'};
+  const roi = p => p && p.roi != null ? (p.roi >= 0 ? '+' : '') + pct(p.roi) : '—';
+  const pnl = p => p && p.n ? `${p.n} ставок, выиграно ${p.wins}, оборот ${rub(p.staked)}, прибыль ${p.profit >= 0 ? '+' : ''}${rub(p.profit)}` : 'ставок пока нет';
+  const tile = (l, v, sub) => `<div class="tile"><span class="lbl">${l}</span><span class="mono v">${v}</span><span class="s">${sub}</span></div>`;
+  const segs = []; for (const [k, groups] of Object.entries(rep.segments || {})) for (const [v, g] of Object.entries(groups))
+    segs.push(`<tr><td class="muted">${esc(k)}</td><td>${esc(v)}</td><td class="num">${g.n}</td><td class="num">${g.model ? g.model.logloss : '—'}</td><td class="num">${g.book ? g.book.logloss : '—'}</td><td class="num">${roi(g.policy)}</td><td class="t3 small">${pnl(g.policy)}</td></tr>`);
+  const rows = j.rows.map(r => { const mk = r.market && r.market !== 'series', picks = (r.pick || '').split('|'), sn = x => mk && picks.length === 2 ? picks[x === 'a' ? 0 : 1] : (x === 'a' ? r.name_a : r.name_b);
+    const res = !r.settled ? '<span class="miss">ждёт</span>' : (r.result === 2 ? '<span class="miss">ничья</span>' : `<span class="chip">${esc(sn(r.result === 1 ? 'a' : 'b'))}</span>`);
+    return `<tr><td class="muted mono">${r.id}</td><td class="muted mono">${dm(r.created)}</td><td><b>${esc(r.name_a)}</b> — <b>${esc(r.name_b)}</b><div class="muted small">${mk ? esc(r.note || r.market) + (r.line != null ? ' ' + r.line : '') + (r.map_no ? ', карта ' + r.map_no : '') : 'серия bo' + r.bo}</div></td>
+      <td class="num">${r.p_model != null ? pct(r.p_model) : '—'}</td><td class="num">${r.p_blend != null ? pct(r.p_blend) : '—'}</td><td class="num">${r.p_claude != null ? pct(r.p_claude) : '—'}</td>
+      <td class="num">${r.odds_a ? r.odds_a + ' / ' + r.odds_b : '—'}</td><td class="num">${r.closing_a ? r.closing_a + ' / ' + r.closing_b : '—'}</td>
+      <td ${r.policy_reason ? `data-tip="${esc(r.policy_reason)}"` : ''}>${r.policy_bet ? `<span class="ok">${esc(sn(r.policy_side))} · ${rub(r.policy_stake)}</span>` : '<span class="muted">пропуск</span>'}</td>
+      <td>${!r.paper && r.side ? esc(sn(r.side)) + (r.stake ? ' · ' + rub(r.stake) : '') : '<span class="muted">бумага</span>'}</td><td>${res}</td></tr>`; }).join('');
+  view(`<div class="col" style="gap:10px;max-width:760px"><div class="lbl">Ставки</div><h1 class="disp" style="font-size:40px;font-weight:700;line-height:1.1">Журнал и политика</h1>
+      <p style="font-size:15px;line-height:1.6;color:var(--t3)">Бумажная торговля по умолчанию: журнал копит прогнозы, кэфы и решения политики. Реальные деньги — только там, где после 200+ записей политика в плюсе и модель точнее линии.</p></div>
+    <div class="tiles">${tile('Рассчитано', rep.n, 'ждут результата: ' + rep.pending)}${tile('Политика, бумага', roi(rep.policy), pnl(rep.policy))}${tile('Реальные ставки', roi(rep.money), pnl(rep.money))}${tile('Флет', rub(st.flat * st.bankroll), 'до ' + rub(st.max_stake * st.bankroll) + ' на ставку')}
+      ${Object.entries(rep.sources).map(([k, v]) => tile(names[k] || k, pct(v.acc), `log loss ${v.logloss} · ${v.n} записей`)).join('')}</div>
+    <div class="g2" style="align-items:start"><section class="card pad col" style="gap:16px"><h2 class="h2">Политика ставок</h2><div class="frow"><label class="f" style="width:120px">Банк, ₽<input type="number" id="bankroll" value="${st.bankroll}"></label><label class="f" style="width:100px">Флет, доля<input type="number" id="flatW" step="0.005" value="${st.flat}"></label><label class="f" style="width:110px">Потолок, доля<input type="number" id="maxStake" step="0.01" value="${st.max_stake}"></label>
+        <label class="f" style="width:100px">Доля линии<input type="number" id="blendW" step="0.05" min="0" max="1" value="${st.blend}"></label><label class="f" style="width:100px">Порог edge<input type="number" id="minEdge" step="0.01" value="${st.min_edge}"></label><button class="btn pri" id="cfgBtn" style="height:40px">Сохранить</button></div>
+        <p class="t3" style="font-size:13px">Смешанная вероятность: ${pct(st.blend, 0)} линии и ${pct(1 - st.blend, 0)} модели. Ставка при запасе от ${pct(st.min_edge, 0)}, формат от bo${st.min_bo}, размер по Келли ×${st.kelly}.${rep.without_closing ? ` Без закрывающих кэфов: ${rep.without_closing}.` : ''}${rep.n < 100 ? ` Для выводов нужно хотя бы 100 рассчитанных записей, сейчас ${rep.n}.` : ''}</p></section>
+      <section class="card pad col" style="gap:16px"><h2 class="h2">Закрывающие кэфы</h2><div class="frow"><label class="f" style="width:100px">№ записи<input type="number" id="closeId"></label><label class="f" style="width:120px">Кэф A / «да»<input type="number" id="closeA" step="0.01"></label><label class="f" style="width:120px">Кэф B / «нет»<input type="number" id="closeB" step="0.01"></label><button class="btn sec" id="closeBtn" style="height:40px">Записать</button><button class="btn sec" id="settleBtn" style="height:40px">Обновить результаты</button></div>
+        <p class="t3" style="font-size:13px">Кэфы перед самым началом матча. По ним отчёт показывает, обыгрывает ли модель линию.</p></section></div>
+    ${segs.length ? `<section class="card pad col" style="gap:12px"><h2 class="h2">По сегментам</h2><div class="scroll"><table><tr><th>Разрез</th><th>Значение</th><th class="num">Записей</th><th class="num">Log loss модели</th><th class="num">Log loss линии</th><th class="num">ROI политики</th><th></th></tr>${segs.join('')}</table></div></section>` : ''}
+    <section class="card pad col" style="gap:12px"><h2 class="h2">Записи</h2><div class="scroll"><table><tr><th>№</th><th>Дата</th><th>Матч и рынок</th><th class="num">Модель</th><th class="num">Смешанная</th><th class="num">Claude</th><th class="num">Кэфы</th><th class="num">Закрытие</th><th>Политика</th><th>Деньги</th><th>Итог</th></tr>
+      ${rows || '<tr><td colspan="11" class="muted" style="text-align:center;padding:28px">Журнал пуст. Записи добавляются из разбора матча, вкладка «Ставка».</td></tr>'}</table></div></section>`, s);
+  $('#closeBtn').onclick = async () => { try { await api('/api/bets/close', {id: +$('#closeId').value, closing_a: +$('#closeA').value, closing_b: +$('#closeB').value}); toast('Закрывающие кэфы записаны', 'ok'); route(); } catch (e) { fail(e); } };
+  $('#cfgBtn').onclick = async () => { try { await api('/api/bets/config', {bankroll: +$('#bankroll').value, blend: +$('#blendW').value, min_edge: +$('#minEdge').value, flat: +$('#flatW').value, max_stake: +$('#maxStake').value}); toast('Политика сохранена', 'ok'); route(); } catch (e) { fail(e); } };
+  $('#settleBtn').onclick = async () => { try { const r = await api('/api/bets/settle', {}); toast('Рассчитано записей: ' + r.settled, 'ok'); route(); } catch (e) { fail(e); } };
+};
+
+// ================================================================ ПОИСК КОМАНД
+const pickT = {a: null, b: null};
+function openSearch() { $('#search').hidden = false; setTimeout(() => $('.teamq[data-side="a"]').focus(), 30); }
+$('#searchBtn').onclick = openSearch;
+$('#searchClose').onclick = () => $('#search').hidden = true;
+$('#search').onclick = e => { if (e.target.id === 'search') $('#search').hidden = true; };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('#search').hidden = true; $('#statusPop').hidden = true; } });
+$$('.teamq').forEach(inp => {
+  const dd = inp.nextElementSibling; let timer;
+  inp.oninput = () => { pickT[inp.dataset.side] = null; $('#searchGo').disabled = true; clearTimeout(timer); timer = setTimeout(async () => {
+    const q = inp.value.trim(); if (!q) { dd.hidden = true; return; }
+    try { const rows = await api('/api/teams?q=' + encodeURIComponent(q));
+      dd.innerHTML = rows.map(t => `<div data-id="${t.id}" data-name="${esc(t.name)}">${logo(t.logo, t.name, 32)}<div style="min-width:0;flex:1"><div style="font-weight:700">${esc(t.name)} <span class="muted small">${esc(t.tag || '')}</span></div><div class="muted small">рейтинг ${t.elo} · ${t.games} карт · последний матч ${dmy(t.last)}</div></div></div>`).join('') || '<div class="muted">Ничего не найдено</div>';
+      dd.hidden = false; } catch (e) { fail(e); } }, 200); };
+  dd.onmousedown = e => { const d = e.target.closest('[data-id]'); if (!d) return; dd.hidden = true; inp.value = d.dataset.name; pickT[inp.dataset.side] = +d.dataset.id;
+    $('#searchGo').disabled = !(pickT.a && pickT.b && pickT.a !== pickT.b); if (inp.dataset.side === 'a' && !pickT.b) setTimeout(() => $('.teamq[data-side="b"]').focus(), 30); };
+  inp.onblur = () => setTimeout(() => dd.hidden = true, 200);
+});
+$('#searchGo').onclick = () => { $('#search').hidden = true; M = null; location.hash = `#match/${pickT.a}/${pickT.b}`; };
+
+// ---------------------------------------------------------------- запуск
+(async () => {
+  try { const hs = await api('/api/heroes'); hs.forEach(h => { heroById[h.id] = h; heroByName[h.name.toLowerCase()] = h.id; }); $('#heroList').innerHTML = hs.map(h => `<option value="${esc(h.name)}">`).join(''); } catch (e) { fail(e); }
+  await loadStatus();
+  route();
+  loadLive().catch(() => {});
+  setInterval(() => loadLive().catch(() => {}), 120000);
+})();
+</script>
+</body>
+</html>
