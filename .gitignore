@@ -1,0 +1,17 @@
+.venv/
+.idea/
+.vscode/
+data/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# личное: заметки о командах и игроках, настройки боковых панелей, рабочие документы
+notes/teams/
+notes/players/
+notes/rails.json
+docs/
+CLAUDE.md
+TASKS.md
+.claude/settings*.json
+/*.html
